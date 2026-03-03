@@ -2,6 +2,7 @@
 
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 import { useEffect, useRef } from 'react';
+import './Galaxy.css';
 
 const vertexShader = `
 attribute vec2 uv;
@@ -15,7 +16,9 @@ void main() {
 }
 `;
 
-const fragmentShader = ` precision highp float;
+const fragmentShader = `
+precision highp float;
+
 uniform float uTime;
 uniform vec3 uResolution;
 uniform vec2 uFocal;
