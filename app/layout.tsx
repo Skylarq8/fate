@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { HeroHeader } from "@/components/header";
-import PixelSnow from "@/components/PixelSnow";
 import Galaxy from "@/components/Galaxy";
 
 const inter = Inter({
