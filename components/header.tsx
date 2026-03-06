@@ -6,9 +6,9 @@ import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const menuItems = [
+    { name: 'Онцлох бараа', href: '#link' },
+    { name: 'Шинэ бараа', href: '#link' },
     { name: 'Бүх бараа', href: '#link' },
-    { name: 'Хямдрал', href: '#link' },
-    { name: 'Брэнд', href: '#link' },
     { name: 'Бидний талаар', href: '#link' },
 ]
 
@@ -38,7 +38,7 @@ export const HeroHeader = () => {
             <nav
                 data-state={menuState && 'active'}
                 className={cn('fixed z-20 w-full px-2 transition-all duration-300', isScrolled && 'px-5')}>
-                <div className={cn('mx-auto mt-2 max-w-306 px-3 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5')}>
+                <div className={cn('mx-auto mt-0 max-w-306 px-3 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5')}>
                     <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
                         <div className="flex w-full justify-between lg:w-auto">
                             <Link

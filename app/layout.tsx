@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Inter, Poppins, Manrope } from "next/font/google";
 import "./globals.css";
 import { HeroHeader } from "@/components/header";
 import Galaxy from "@/components/Galaxy";
+import MobileNav from "@/components/MobileNav";
+import ProductSlider from "@/components/ProductSlider";
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -12,8 +14,14 @@ const inter = Inter({
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['600', '700'],
+  weight: ['500', '600', '700'],
   variable: '--font-poppins',
+})
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-manrope',
 })
 
 export const metadata: Metadata = {
@@ -29,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${poppins.variable} antialiased`}>
+        className={`${inter.variable} ${poppins.variable} ${manrope.variable} antialiased`}>
               <div className="fixed inset-0 -z-10">
                     <Galaxy 
                       mouseRepulsion
@@ -52,9 +60,10 @@ export default function RootLayout({
               {/* <main className="relative z-10">
                 {children}
               </main> */}
-              <main className="flex-1 w-full">
-                <div className="max-w-350 mx-auto px-5 sm:px-10 lg:px-34 py-6 pt-18 sm:pt-24">
+              <main className="flex-1 w-full mb-10">
+                <div className="max-w-350 mx-auto px-5 sm:px-10 lg:px-34 py-6 pt-16 sm:pt-18 lg:pt-24">
                   {children}
+                  <MobileNav/>
                 </div>
               </main>
       </body>

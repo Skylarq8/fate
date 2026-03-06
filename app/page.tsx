@@ -1,31 +1,20 @@
-import ProductCard from "@/components/ProductCard";
-import { products } from "@/lib/product";
+import Accordin from "@/components/Accordin";
+import Footer from "@/components/Footer";
+import HeroSlider from "@/components/HeroSlider";
+import ProductSlider from "@/components/ProductSlider";
 
 export default function Home() {
   return (
     <div>
-      <div>
-        <div className="flex mb-3 sm:mb-4 justify-between items-baseline-last">
-          <h1 className="text-[20px] sm:text-2xl font-heading font-bold">Онцлох бүтээгдэхүүн</h1>
-          <h1 className="font-body text-gray-300 text-[12px] sm:text-[13px] lg:text-[14px] border-b border-current inline-block">Бүгдийг харах</h1>
-        </div>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} title={product.title} image={product.image} price={product.price} id={0}/>
-          ))}
-        </div>
+      <HeroSlider/>
+      <ProductSlider title="Онцлох бараа"/>
+      <ProductSlider title="Шинэ бараа"/>
+      <p className="font-body font-medium text-center text-sm lg:text-xl mt-10 lg:mt-15 text-white/90">Хүмүүсийн нийтлэг асуудаг асуултууд</p>
+      <h1 className="font-heading font-semibold text-center text-2xl lg:text-3xl mt-3 text-white/90">FAQ</h1>
+      <div className="flex justify-center mt-3">
+        <Accordin/>
       </div>
-      <div>
-        <div className="flex mt-7 mb-3 sm:mb-4 justify-between items-baseline-last">
-          <h1 className="text-[20px] sm:text-2xl font-heading font-bold">Шинэ бүтээгдэхүүн</h1>
-          <h1 className="font-body text-gray-300 text-[12px] sm:text-[13px] lg:text-[14px] border-b border-current inline-block">Бүгдийг харах</h1>
-        </div>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} title={product.title} image={product.image} price={product.price} id={0}/>
-          ))}
-        </div>
-      </div>
+      <Footer/>
     </div>
   );
 }
