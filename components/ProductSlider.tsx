@@ -72,7 +72,7 @@ export default function ProductCarousel({ title }: ProductSliderProps) {
           slidesPerGroup={2}
           spaceBetween={7}
           breakpoints={{
-            400: { slidesPerView: 2 },
+            300: { slidesPerView: 2 },
             640: { slidesPerView: 3 },
           }}
         >
