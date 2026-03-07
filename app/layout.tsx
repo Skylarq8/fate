@@ -2,9 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Poppins, Manrope } from "next/font/google";
 import "./globals.css";
 import { HeroHeader } from "@/components/header";
+import { WishlistProvider } from "@/context/WishlistContext";
 import Galaxy from "@/components/Galaxy";
 import MobileNav from "@/components/MobileNav";
-import ProductSlider from "@/components/ProductSlider";
+import { ToastProvider } from "@/context/ToastContext";
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -53,19 +54,17 @@ export default function RootLayout({
                       starSpeed={0.5}
                       speed={1}/>
               </div>
-
-              {/* 📦 CONTENT */}
-              <HeroHeader />
-
-              {/* <main className="relative z-10">
-                {children}
-              </main> */}
-              <main className="flex-1 w-full mb-10">
-                <div className="max-w-350 mx-auto px-5 sm:px-10 lg:px-34 py-6 pt-16 sm:pt-18 lg:pt-24">
-                  {children}
-                  <MobileNav/>
-                </div>
-              </main>
+              <ToastProvider>
+                <WishlistProvider>
+                  <HeroHeader />
+                  <main className="flex-1 w-full mb-10">
+                    <div className="max-w-350 mx-auto px-5 sm:px-10 lg:px-34 py-6 pt-16 sm:pt-18 lg:pt-24">
+                        {children}
+                      <MobileNav/>
+                    </div>
+                  </main>
+                </WishlistProvider>
+              </ToastProvider>
       </body>
     </html>
   );
