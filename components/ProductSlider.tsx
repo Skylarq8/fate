@@ -78,7 +78,7 @@ export default function ProductCarousel({ title }: ProductSliderProps) {
         >
           {products.map((product) => (
             <SwiperSlide key={product.id}>
-              <ProductCard {...product} />
+              <ProductCard  {...product} />
             </SwiperSlide>
           ))}
         </Swiper>

@@ -1,7 +1,7 @@
 export type ProductItem = {
   id: number
   title: string
-  price: number
+  price: string
   category: string | string[] 
   createdAt: string 
   image: string
