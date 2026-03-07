@@ -12,7 +12,9 @@ export default function ProductCard({
   id,
   title,
   image,
-  price
+  price,
+  category,
+  createdAt
 }: ProductItem) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast()
@@ -24,7 +26,7 @@ export default function ProductCard({
     } else {
       showToast("❤️ Хүслийн жагсаалтад нэмэгдлээ")
     }
-    toggleWishlist({ id, title, image, price })
+    toggleWishlist({ id, title, image, price, category, createdAt })
   }
   return (
     <>
