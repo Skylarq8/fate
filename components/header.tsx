@@ -101,7 +101,7 @@ export const HeroHeader = () => {
                                 )} */}
                             </Link>
 
-                            <Link href={`/checkouts`} className="relative">
+                            <Link href={`/cart`} className="relative">
                                 <Button variant="outline">
                                 <ShoppingCart className='h-[1.2rem] w-[1.2rem]'/>
                                 </Button>

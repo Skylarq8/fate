@@ -1,18 +1,18 @@
 // WishlistContext.tsx
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { ProductItem } from "@/lib/product";
+import { Product } from "@/lib/api";
 
 interface WishlistContextType {
-  wishlist: ProductItem[];
-  toggleWishlist: (product: ProductItem) => void;
-  isInWishlist: (id: number) => boolean;
+  wishlist: Product[];
+  toggleWishlist: (product: Product) => void;
+  isInWishlist: (id: string) => boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider = ({ children }: { children: React.ReactNode }) => {
-  const [wishlist, setWishlist] = useState<ProductItem[]>([]);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -25,7 +25,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const toggleWishlist = (product: ProductItem) => {
+  const toggleWishlist = (product: Product) => {
     setWishlist((prev) => {
       const exists = prev.find((p) => p.id === product.id);
       if (exists) return prev.filter((p) => p.id !== product.id);
@@ -33,7 +33,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     });
   };
 
-  const isInWishlist = (id: number) => wishlist.some((p) => p.id === id);
+  const isInWishlist = (id: string) => wishlist.some((p) => p.id === id);
 
   return (
     <WishlistContext.Provider value={{ wishlist, toggleWishlist, isInWishlist }}>

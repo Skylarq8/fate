@@ -1,0 +1,292 @@
+// 📁 app/product/[id]/page.tsx
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import { ShoppingCart, ChevronLeft, Minus, Plus, Heart } from "lucide-react"
+import { getProduct, getProducts, Product, fmt } from "@/lib/api"
+import { useCartStore } from "@/store/cartStore"
+import { useWishlist } from "@/context/WishlistContext"
+import { useToast } from "@/context/ToastContext"
+import ProductCard from "@/components/ProductCard"
+import Accordin from "@/components/Accordin"
+import Footer from "@/components/Footer"
+
+export default function ProductDetailPage() {
+  const { id }    = useParams<{ id: string }>()
+  const addItem   = useCartStore(s => s.addItem)
+  const { toggleWishlist, isInWishlist } = useWishlist()
+  const { showToast } = useToast()
+
+  const [product,   setProduct]   = useState<Product | null>(null)
+  const [related,   setRelated]   = useState<Product[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [activeImg, setActiveImg] = useState(0)
+  const [size,      setSize]      = useState("")
+  const [color,     setColor]     = useState("")
+  const [qty,       setQty]       = useState(1)
+  const [added,     setAdded]     = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    setActiveImg(0)
+    getProduct(id).then(p => {
+      setProduct(p)
+      if (p) { setSize(p.sizes[0] ?? ""); setColor(p.colors[0] ?? "") }
+      setLoading(false)
+    })
+  }, [id])
+
+  useEffect(() => {
+    if (!product) return
+    getProducts().then(all => {
+      const catIds = product.categories.map(c => c.category.id)
+      setRelated(all.filter(p =>
+        p.id !== product.id &&
+        p.categories.some(c => catIds.includes(c.category.id))
+      ).slice(0, 4))
+    })
+  }, [product])
+
+  const liked = product ? isInWishlist(product.id as any) : false
+  const img   = product ? (product.images.find(i => i.isPrimary) ?? product.images[0]) : null
+  const price = product
+    ? (product.discountEnabled && product.finalPrice ? product.finalPrice : product.price)
+    : 0
+
+  const handleAddToCart = () => {
+    if (!product) return
+    const img = product.images.find(i => i.isPrimary) ?? product.images[0]
+    addItem({ productId: product.id, title: product.title, price, image: img?.url ?? "", size, color, quantity: qty })
+    setAdded(true)
+    showToast("🛒 Сагсанд нэмэгдлээ")
+    setTimeout(() => setAdded(false), 2000)
+  }
+
+  const handleWishlist = () => {
+    if (!product) return
+    const img = product.images.find(i => i.isPrimary) ?? product.images[0]
+    if (liked) {
+      showToast("💔 Хүслийн жагсаалтаас хасагдлаа")
+    } else {
+      showToast("❤️ Хүслийн жагсаалтад нэмэгдлээ")
+    }
+    toggleWishlist({
+      id:        product.id as any,
+      title:     product.title,
+      image:     img?.url ?? "",
+      price:     String(price),
+      category:  product.categories[0]?.category.name ?? "",
+      createdAt: product.createdAt,
+    } as any)
+  }
+
+  const sorted = product ? [...product.images].sort((a, b) => a.order - b.order) : []
+
+  // ── Skeleton ──────────────────────────────────────────────────────────────
+  if (loading) return (
+    <div className="max-w-6xl mx-auto px-5 py-12">
+      <div className="h-4 w-24 rounded skeleton mb-8" />
+      <div className="grid md:grid-cols-2 gap-12">
+        <div className="aspect-square rounded-3xl skeleton" />
+        <div className="space-y-5 pt-4">
+          <div className="h-4 rounded skeleton w-1/3" />
+          <div className="h-8 rounded skeleton w-4/5" />
+          <div className="h-6 rounded skeleton w-1/3" />
+          <div className="h-16 rounded skeleton" />
+          <div className="flex gap-2">
+            {[1,2,3].map(i => <div key={i} className="h-10 w-16 rounded-xl skeleton" />)}
+          </div>
+          <div className="flex gap-2">
+            {[1,2,3].map(i => <div key={i} className="h-10 w-20 rounded-xl skeleton" />)}
+          </div>
+          <div className="h-14 rounded-2xl skeleton" />
+        </div>
+      </div>
+    </div>
+  )
+
+  if (!product) return (
+    <div className="max-w-6xl mx-auto px-5 py-24 text-center space-y-4">
+      <p className="text-5xl">✦</p>
+      <p className="font-display text-xl text-white/60">Бараа олдсонгүй</p>
+      <Link href="/products" className="text-sm text-white/40 hover:text-white transition-colors">← Буцах</Link>
+    </div>
+  )
+
+  return (
+    <>
+    <div className="max-w-6xl mx-auto py-3 space-y-5">
+
+      <Link href="/products"
+        className="inline-flex items-center gap-1.5 text-sm text-white hover:text-white transition-colors">
+        <ChevronLeft size={15} /> Бараанууд
+      </Link>
+
+      {/* ── Detail ── */}
+      <div className="grid md:grid-cols-2 gap-5">
+
+        {/* Images */}
+        <div className="space-y-3">
+          <div className="relative aspect-square rounded-3xl overflow-hidden glass">
+            {sorted[activeImg] ? (
+              <Image
+                src={sorted[activeImg].url}
+                alt={product.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full"
+                style={{ background: "linear-gradient(135deg, rgba(167,139,250,0.15), rgba(96,165,250,0.15))" }} />
+            )}
+            {/* {product.discountEnabled && product.finalPrice && (
+              <span className="absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-full"
+                style={{ background: "linear-gradient(135deg, #a78bfa, #60a5fa)" }}>
+                -{Math.round((1 - product.finalPrice / product.price) * 100)}%
+              </span>
+            )} */}
+          </div>
+
+          {sorted.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto py-1 px-1 scrollbar-hide">
+              {sorted.map((img, i) => (
+                <button key={img.id} onClick={() => setActiveImg(i)}
+                  className={`relative flex-shrink-0 w-15 h-15 rounded-xl overflow-hidden border-2 transition-all ${
+                    activeImg === i ? "border-white/90 scale-105" : "border-white/10 opacity-50 hover:opacity-100"
+                  }`}>
+                  <Image src={img.url} alt="" fill className="object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="space-y-5 md:pt-2">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
+            {product.title}
+          </h1>
+
+          {/* Price */}
+          <div className="flex items-center gap-3">
+            <span className="text-3xl font-bold text-white">{fmt(price)}</span>
+            {product.discountEnabled && product.finalPrice && (
+              <>
+                <span className="text-white/50 line-through text-xl">{fmt(product.price)}</span>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white bg-red-500">
+                  -{Math.round((1 - product.finalPrice / product.price) * 100)}%
+                </span>
+              </>
+            )}
+          </div>
+          <div className="space-y-2.5">
+            <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Барааны дэлгэрэнгүй</p>
+            <p className="text-white leading-relaxed text-[16px] lg:text-[18px]">{product.description}</p>
+          </div>
+
+          {/* Categories */}
+          {/* <div className="flex gap-2 flex-wrap">
+            {product.categories.map(({ category }) => (
+              <span key={category.id} className="text-xs glass-sm px-3 py-1 rounded-full text-white/60 font-medium">
+                {category.name}
+              </span>
+            ))}
+          </div> */}
+
+          {/* Sizes */}
+          {product.sizes.length > 0 && (
+            <div className="space-y-2.5">
+              <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Хэмжээ</p>
+              <div className="flex gap-2 flex-wrap">
+                {product.sizes.map(s => (
+                  <button key={s} onClick={() => setSize(s)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      size === s ? "text-black/90 bg-white/90" : "glass-sm text-white/60 hover:text-white/80"
+                    }`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Colors */}
+          {product.colors.length > 0 && (
+            <div className="space-y-2.5">
+              <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
+              <div className="flex gap-2 flex-wrap">
+                {product.colors.map(c => (
+                  <button key={c} onClick={() => setColor(c)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium uppercase transition-all ${
+                      color === c ? "text-black/90 bg-white/90" : "glass-sm text-white/60 hover:text-white/80"
+                    }`}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Quantity */}
+        <div className="flex items-center justify-between glass rounded-2xl">
+        <p className="text-xs tracking-[0.25em] text-white/90 uppercase font-medium">
+            Тоо ширхэг
+        </p>
+            <div className="flex items-center rounded-xl overflow-hidden border border-white/10 bg-white/10 backdrop-blur-md">
+                <button
+                onClick={() => setQty(q => Math.max(1, q - 1))}
+                className="px-3 py-2 text-white/60 hover:text-white transition-all">
+                <Minus size={16} />
+                </button>
+                <span className="px-5 py-2 text-sm font-semibold text-white min-w-[40px] text-center border-x border-white/10">
+                {qty}
+                </span>
+                <button
+                onClick={() => setQty(q => q + 1)}
+                className="px-3 py-2 text-white/60 hover:text-white transition-all">
+                <Plus size={16} />
+                </button>
+            </div>
+        </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3">
+            <button onClick={handleAddToCart}
+              className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-semibold text-sm transition-all hover:scale-[1.02] active:scale-98 bg-white/90 text-black/90">
+              <ShoppingCart size={18} />
+              {added ? "Нэмэгдлээ ✓" : "Сагсанд нэмэх"}
+            </button>
+
+            <button onClick={handleWishlist}
+              className="p-4 rounded-2xl glass-sm hover:bg-white/10 transition-all"
+              style={liked ? { border: "1px solid rgba(239,68,68,0.4)", background: "rgba(239,68,68,0.15)" } : {}}>
+              <Heart size={20} className={liked ? "fill-red-500 text-red-500" : "text-white/60"} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Related ── */}
+      {related.length > 0 && (
+        <section>
+          <p className="text-xs tracking-[0.25em] text-white/90 uppercase mb-2">Related</p>
+          <h2 className="font-display text-2xl font-bold text-white mb-7">Төстэй бараанууд</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {related.map(p => <ProductCard key={p.id} product={p} />)}
+          </div>
+        </section>
+      )}
+    </div>
+    <p className="font-body font-medium text-center text-sm lg:text-xl mt-10 lg:mt-15 text-white/90">Хүмүүсийн нийтлэг асуудаг асуултууд</p>
+    <h1 className="font-heading font-semibold text-center text-2xl lg:text-3xl mt-3 text-white/90">FAQ</h1>
+    <div className="flex justify-center mt-3">
+        <Accordin/>
+    </div>
+    <Footer/>
+    </>
+  )
+}

@@ -6,6 +6,8 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import Galaxy from "@/components/Galaxy";
 import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/context/ToastContext";
+import Accordin from "@/components/Accordin";
+import Footer from "@/components/Footer";
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
