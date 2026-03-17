@@ -64,7 +64,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className={`
               transform transition-all duration-300 ease-in-out
               ${visible ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0"}
-              flex items-center justify-between bg-background/90 rounded-xl shadow-lg border px-4 py-3
+              flex items-center justify-between bg-white/90 rounded-xl shadow-lg border px-4 py-3
             `}
             style={{ transform: `translateY(${dragY}px)` }}
             onTouchStart={handleTouchStart}
@@ -73,7 +73,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           >
             {/* Message */}
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-white/90">
+              <span className="text-sm font-medium text-black/80">
                 {message}
               </span>
             </div>
@@ -81,7 +81,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             {/* Close */}
             <X
               size={18}
-              className="text-gray-500 cursor-pointer"
+              className="text-black/80 cursor-pointer"
               onClick={() => setVisible(false)}
             />
           </div>

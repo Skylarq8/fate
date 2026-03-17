@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button'
 import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useWishlist } from '@/context/WishlistContext'
+import { useCartStore } from '@/store/cartStore'
 
 const menuItems = [
     { name: 'Нүүр хуудас', href: '/' },
-    { name: 'Онцлох бараа', href: '#link' },
-    { name: 'Шинэ бараа', href: '#link' },
     { name: 'Бүх бараа', href: '/products' },
+    // { name: 'Онцлох бараа', href: '/products' },
+    // { name: 'Шинэ бараа', href: '/products' },
     { name: 'Бидний талаар', href: '#about'},
 ]
 
@@ -18,6 +19,7 @@ export const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false);
     const [isScrolled, setIsScrolled] = React.useState(false);
     const { wishlist } = useWishlist();
+    const { items } = useCartStore();
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -103,6 +105,11 @@ export const HeroHeader = () => {
 
                             <Link href={`/cart`} className="relative">
                                 <Button variant="outline">
+                                    {items.length > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                            {items.length}
+                                        </span>
+                                    )}
                                 <ShoppingCart className='h-[1.2rem] w-[1.2rem]'/>
                                 </Button>
                             </Link>

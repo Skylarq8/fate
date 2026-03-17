@@ -13,12 +13,14 @@ import { useToast } from "@/context/ToastContext"
 import ProductCard from "@/components/ProductCard"
 import Accordin from "@/components/Accordin"
 import Footer from "@/components/Footer"
+import { useRouter } from "next/navigation"
 
 export default function ProductDetailPage() {
   const { id }    = useParams<{ id: string }>()
   const addItem   = useCartStore(s => s.addItem)
   const { toggleWishlist, isInWishlist } = useWishlist()
   const { showToast } = useToast()
+  const router = useRouter()
 
   const [product,   setProduct]   = useState<Product | null>(null)
   const [related,   setRelated]   = useState<Product[]>([])
@@ -88,23 +90,24 @@ export default function ProductDetailPage() {
 
   // ── Skeleton ──────────────────────────────────────────────────────────────
   if (loading) return (
-    <div className="max-w-6xl mx-auto px-5 py-12">
-      <div className="h-4 w-24 rounded skeleton mb-8" />
-      <div className="grid md:grid-cols-2 gap-12">
-        <div className="aspect-square rounded-3xl skeleton" />
-        <div className="space-y-5 pt-4">
-          <div className="h-4 rounded skeleton w-1/3" />
-          <div className="h-8 rounded skeleton w-4/5" />
-          <div className="h-6 rounded skeleton w-1/3" />
-          <div className="h-16 rounded skeleton" />
-          <div className="flex gap-2">
-            {[1,2,3].map(i => <div key={i} className="h-10 w-16 rounded-xl skeleton" />)}
-          </div>
-          <div className="flex gap-2">
-            {[1,2,3].map(i => <div key={i} className="h-10 w-20 rounded-xl skeleton" />)}
-          </div>
-          <div className="h-14 rounded-2xl skeleton" />
+    <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-6 py-10 animate-pulse">
+      {/* Image */}
+      <div className="aspect-square rounded-3xl bg-white/10" />
+      {/* Content */}
+      <div className="space-y-6">
+        <div className="h-15 w-3/4 bg-white/10 rounded-lg" />
+        <div className="h-6 w-40 bg-white/10 rounded-lg" />
+        <div className="space-y-2">
+          <div className="h-4 w-full bg-white/10 rounded" />
+          <div className="h-4 w-5/6 bg-white/10 rounded" />
+          <div className="h-4 w-2/3 bg-white/10 rounded" />
         </div>
+        <div className="flex gap-2">
+          <div className="h-9 w-16 bg-white/10 rounded-lg" />
+          <div className="h-9 w-16 bg-white/10 rounded-lg" />
+          <div className="h-9 w-16 bg-white/10 rounded-lg" />
+        </div>
+        <div className="h-12 w-full bg-white/10 rounded-xl" />
       </div>
     </div>
   )
@@ -121,10 +124,10 @@ export default function ProductDetailPage() {
     <>
     <div className="max-w-6xl mx-auto py-3 space-y-5">
 
-      <Link href="/products"
+      <button onClick={() => router.back()}
         className="inline-flex items-center gap-1.5 text-sm text-white hover:text-white transition-colors">
-        <ChevronLeft size={15} /> Бараанууд
-      </Link>
+        <ChevronLeft size={15} /> Буцах
+      </button>
 
       {/* ── Detail ── */}
       <div className="grid md:grid-cols-2 gap-5">
@@ -269,6 +272,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      
 
       {/* ── Related ── */}
       {related.length > 0 && (

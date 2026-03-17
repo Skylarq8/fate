@@ -3,7 +3,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
 // ── Simple in-memory cache ────────────────────────────────────────────────────
 const cache = new Map<string, { data: any; ts: number }>()
-const CACHE_TTL = 300_000 // 60 секунд
+const CACHE_TTL = 600_000 // 60 секунд
 
 async function cachedFetch(url: string) {
   const hit = cache.get(url)
