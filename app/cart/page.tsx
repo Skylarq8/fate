@@ -8,7 +8,7 @@ import { fmt } from "@/lib/api"
 import { useState } from "react"
 
 export default function CartPage() {
-  const { items, removeItem, increaseQty, decreaseQty, totalPrice, clearCart } = useCartStore()
+  const { items, removeItem, increaseQty, decreaseQty, totalPrice, clearCart, setCoupon } = useCartStore()
   const shipping = totalPrice() >= 100000 ? 0 : 5000
   const [couponCode,    setCouponCode]    = useState("")
   const [couponLoading, setCouponLoading] = useState(false)
@@ -53,7 +53,7 @@ const finalTotal = subtotal - couponDiscount + shipping
       const res  = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/coupons/validate`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ code: couponCode.trim() }),
+        body:    JSON.stringify({ code: couponCode.trim(), productIds: items.map(i => i.productId) }),
       })
       const data = await res.json()
       if (!res.ok || !data.data) {
@@ -66,6 +66,12 @@ const finalTotal = subtotal - couponDiscount + shipping
           discountPercent: c.discountPercent,
           discountAmount: c.discountAmount,
           type:     c.discountType,
+        })
+        setCoupon({
+          code: c.code,
+          discountPercent: c.discountPercent,
+          discountAmount: c.discountAmount,
+          type: c.discountType,
         })
       }
     } catch {
@@ -98,7 +104,8 @@ const finalTotal = subtotal - couponDiscount + shipping
         <div>
           <h1 className="font-display text-3xl font-bold text-white">Миний сагс</h1>
         </div>
-        <p className="text-[14px] text-red-400 underline" onClick={() => clearCart()}>Бүгдийг устгах</p>
+        {/* <p className="text-[14px] text-red-400 underline" onClick={() => clearCart()}>Бүгдийг устгах</p> */}
+        <Trash2 size={18} className="text-white hover:text-red-400" onClick={() => clearCart()}/>
       </div>
       <div className="grid md:grid-cols-3 gap-8">
         {/* ── Items ── */}
@@ -125,7 +132,7 @@ const finalTotal = subtotal - couponDiscount + shipping
                   <div className="flex mt-2 flex-col justify-center pr-1">
                     <p className="text-white font-bold text-lg">{fmt(item.price)}</p>
                     {item.originalPrice && (
-                      <p className="text-white/35 line-through text-[14px] mt-0.5">{fmt(item.originalPrice)}</p>
+                      <p className="text-white/50 line-through text-[14px] mt-0.5">{fmt(item.originalPrice)}</p>
                     )}
                   </div>
                 </div>
@@ -169,7 +176,7 @@ const finalTotal = subtotal - couponDiscount + shipping
             </div>
             
  
-            <div className="space-y-2 border-t border-white/20 pt-4">
+            <div className="space-y-2 border-t border-rose-500/50 pt-4">
 
           {/* 1. Нийт үнэ */}
           <div className="flex justify-between text-sm">
@@ -211,24 +218,24 @@ const finalTotal = subtotal - couponDiscount + shipping
           {/* 6. Final */}
           <div className="flex justify-between font-bold">
             <span className="text-white">Эцсийн нийт дүн</span>
-            <span className="text-white text-lg">{fmt(finalTotal)}</span>
+            <span className="text-white  text-lg">{fmt(finalTotal)}</span>
           </div>
         </div>
           {/* ── Coupon ── */}
-            <div className="border-t border-white/20 pt-4 space-y-2">
-              <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Купон</p>
+            <div className="border-t border-rose-500/50 pt-4 space-y-2">
+              <p className="text-xs text-white/90 uppercase">Купон</p>
               <div className="flex gap-2">
                 <input
                   value={couponCode}
                   onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponResult(null) }}
                   onKeyDown={e => e.key === "Enter" && handleCoupon()}
                   placeholder="Хөнгөлөлтийн код оруулах"
-                  className="flex-1 glass-sm rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-white/90 bg-transparent border border-white/30"
+                  className="flex-1 glass-sm rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-rose-500/50 bg-transparent border border-rose-500/20"
                 />
                 <button
                   onClick={handleCoupon}
                   disabled={couponLoading || !couponCode.trim()}
-                  className="px-3 py-2.5 rounded-xl text-sm font-medium bg-white/90 text-black/80 transition-all disabled:opacity-60">
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium bg-rose-500 text-white transition-all disabled:opacity-60">
                   {couponLoading ? (
                     <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
                   ) : (
@@ -253,10 +260,12 @@ const finalTotal = subtotal - couponDiscount + shipping
                 </div>
               )}
             </div>
-            <button
-              className="w-full py-3.5 rounded-2xl font-semibold bg-white/90 text-black/80 text-sm transition-all hover:scale-[1.02] active:scale-98">
-              Захиалах
-            </button>
+            <Link href={'/checkout'}>
+              <button
+                className="w-full py-3.5 rounded-2xl font-semibold bg-rose-500 text-sm transition-all hover:scale-[1.02] active:scale-98">
+                Захиалах
+              </button>
+            </Link>
           </div>
         </div>
       </div>

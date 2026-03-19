@@ -28,8 +28,16 @@ export default function ProductDetailPage() {
   const [activeImg, setActiveImg] = useState(0)
   const [size,      setSize]      = useState("")
   const [color,     setColor]     = useState("")
+  const [timeLeft, setTimeLeft] = useState("")
   const [qty,       setQty]       = useState(1)
   const [added,     setAdded]     = useState(false)
+  const [remainingTime, setRemainingTime] = useState<{
+    days: number
+    hours: number
+    minutes: number
+    seconds: number
+    totalMs: number
+  } | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -52,6 +60,33 @@ export default function ProductDetailPage() {
       ).slice(0, 4))
     })
   }, [product])
+
+
+  useEffect(() => {
+    if (!product?.discountEndsAt) return
+
+    const interval = setInterval(() => {
+      const end = new Date(product.discountEndsAt!).getTime()
+      const now = Date.now()
+      const diff = end - now
+
+      if (diff <= 0) {
+        setTimeLeft("Хямдрал дууссан")
+        clearInterval(interval)
+        return
+      }
+
+     setRemainingTime({
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((diff / (1000 * 60)) % 60),
+      seconds: Math.floor((diff / 1000) % 60),
+      totalMs: diff,
+    })
+  }, 1000)
+
+  return () => clearInterval(interval)
+}, [product])
 
   const liked = product ? isInWishlist(product.id as any) : false
   const img   = product ? (product.images.find(i => i.isPrimary) ?? product.images[0]) : null
@@ -187,11 +222,22 @@ export default function ProductDetailPage() {
               </>
             )}
           </div>
+
+          {product.discountEnabled && product.discountEndsAt && remainingTime && (
+            <div className={`text-sm font-semibold px-3 py-1.5 rounded-lg inline-block
+              ${remainingTime.totalMs < 1000 * 60 * 60 * 24
+                ? "bg-red-500/20 text-red-400 border border-red-500/40"
+                : "bg-yellow-400/20 text-yellow-300 border border-yellow-400/40"
+              }`}>
+              ⏳ Хямдрал дуусах:{" "}
+              {remainingTime.days}х {remainingTime.hours}ц {remainingTime.minutes}м {remainingTime.seconds}с
+            </div>
+          )}
+
           <div className="space-y-2.5">
             <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Барааны дэлгэрэнгүй</p>
             <p className="text-white leading-relaxed text-[16px] lg:text-[18px]">{product.description}</p>
           </div>
-
           {/* Categories */}
           {/* <div className="flex gap-2 flex-wrap">
             {product.categories.map(({ category }) => (

@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div>
       <HeroSlider/>
-      <ProductSlider title="Онцлох бараанууд" filter="featured" />
+      <ProductSlider title="Хямдралтай бараанууд" filter="featured" />
       <ProductSlider title="Шинэ бараанууд"   filter="newest"   />
       <ProductSlider title="Бүх бараа"         filter="all"      />
       <p className="font-body font-medium text-center text-sm lg:text-xl mt-10 lg:mt-15 text-white/90">Хүмүүсийн нийтлэг асуудаг асуултууд</p>

@@ -160,7 +160,7 @@ export default function ProductsPage() {
 
       {/* ── Grid ── */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="space-y-3">
               <div className="aspect-square rounded-2xl skeleton" />

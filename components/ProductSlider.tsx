@@ -44,7 +44,7 @@ export default function ProductCarousel({ title, filter = "all" }: Props) {
     <div className="mt-3 md:mt-7 lg:mt-9">
       {/* Title row */}
       <div className="flex mb-4 sm:mb-6 justify-between items-center">
-        <h1 className="text-white/90 text-[25px] sm:text-3xl font-head font-bold">
+        <h1 className="text-white/90 text-[23px] sm:text-3xl font-head font-bold">
           {title}
         </h1>
 

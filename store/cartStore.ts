@@ -6,29 +6,45 @@ export interface CartItem {
   id: string
   productId: string
   title: string
-  price: number          // төлөх үнэ
-  originalPrice?: number // үндсэн үнэ (хямдрал байвал)
+  price: number
+  originalPrice?: number
   image: string
   size: string
   color: string
   quantity: number
 }
 
+export interface CouponState {
+  code: string
+  type: "percent" | "amount"
+  discountPercent?: number
+  discountAmount?: number
+}
+
 interface CartStore {
   items: CartItem[]
-  addItem: (item: Omit<CartItem, "id">) => void
+  coupon: CouponState | null
+
+  addItem:    (item: Omit<CartItem, "id">) => void
   removeItem: (id: string) => void
-  increaseQty: (id: string) => void
-  decreaseQty: (id: string) => void
-  clearCart: () => void
-  totalCount: () => number
-  totalPrice: () => number
+  increaseQty:(id: string) => void
+  decreaseQty:(id: string) => void
+  clearCart:  () => void
+  setCoupon:  (coupon: CouponState | null) => void
+
+  totalCount:    () => number
+  totalPrice:    () => number  // хямдралгүй нийт
+  subtotal:      () => number  // барааны хямдрал хасаад
+  shippingFee:   () => number
+  couponDiscount:() => number
+  finalTotal:    () => number  // бүгдийг тооцсон эцсийн дүн
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
-      items: [],
+      items:  [],
+      coupon: null,
 
       addItem: (item) => {
         const key = `${item.productId}-${item.size}-${item.color}`
@@ -45,26 +61,53 @@ export const useCartStore = create<CartStore>()(
         })
       },
 
-      removeItem: (id) =>
-        set(state => ({ items: state.items.filter(i => i.id !== id) })),
+      removeItem:  (id) => set(state => ({ items: state.items.filter(i => i.id !== id) })),
 
-      increaseQty: (id) =>
-        set(state => ({
-          items: state.items.map(i => i.id === id ? { ...i, quantity: i.quantity + 1 } : i)
-        })),
+      increaseQty: (id) => set(state => ({
+        items: state.items.map(i => i.id === id ? { ...i, quantity: i.quantity + 1 } : i)
+      })),
 
-      decreaseQty: (id) =>
-        set(state => ({
-          items: state.items
-            .map(i => i.id === id ? { ...i, quantity: i.quantity - 1 } : i)
-            .filter(i => i.quantity > 0)
-        })),
+      decreaseQty: (id) => set(state => ({
+        items: state.items
+          .map(i => i.id === id ? { ...i, quantity: i.quantity - 1 } : i)
+          .filter(i => i.quantity > 0)
+      })),
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], coupon: null }),
 
-      totalCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+      setCoupon: (coupon) => set({ coupon }),
 
-      totalPrice: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      totalCount: () => get().items.reduce((s, i) => s + i.quantity, 0),
+
+      // барааны үндсэн нийт (хямдралгүй)
+      totalPrice: () => get().items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0),
+
+      // барааны хямдрал хасагдсан дүн
+      subtotal: () => {
+        const items = get().items
+        const base     = items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0)
+        const prodDisc = items.reduce((s, i) => i.originalPrice ? s + (i.originalPrice - i.price) * i.quantity : s, 0)
+        return base - prodDisc
+      },
+
+      shippingFee: () => get().subtotal() >= 100000 ? 0 : 5000,
+
+      couponDiscount: () => {
+        const coupon   = get().coupon
+        const subtotal = get().subtotal()
+        if (!coupon) return 0
+        if (coupon.type === "percent" && coupon.discountPercent) {
+          return Math.round(subtotal * (coupon.discountPercent / 100))
+        }
+        if (coupon.type === "amount" && coupon.discountAmount) {
+          return Math.min(coupon.discountAmount, subtotal)
+        }
+        return 0
+      },
+
+      finalTotal: () => {
+        return get().subtotal() + get().shippingFee() - get().couponDiscount()
+      },
     }),
     { name: "cart-storage" }
   )
