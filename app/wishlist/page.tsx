@@ -36,8 +36,8 @@ export default function WishlistPage() {
 
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center text-center min-h-[70vh]">
-          <HeartOff className="w-12 h-12 text-white/30 mb-4" />
-          <p className="text-lg font-medium text-white/60">Хоосон байна</p>
+          <HeartOff className="w-12 h-12 text-white/90 mb-4" />
+          <p className="text-lg font-medium text-white/90">Хоосон байна</p>
           <p className="text-sm text-white/40 mt-1">Таалагдсан бараа хараахан алга</p>
         </div>
       ) : (

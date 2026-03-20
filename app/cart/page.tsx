@@ -84,14 +84,14 @@ const finalTotal = subtotal - couponDiscount + shipping
   if (items.length === 0) return (
     <div className="max-w-lg min-h-[80vh] flex justify-center items-center flex-col mx-auto px-5 py-28 text-center space-y-6 fade-up">
       <div className="w-24 h-24 glass rounded-3xl flex items-center justify-center mx-auto">
-        <ShoppingCart className="w-12 h-12 text-white/30" />
+        <ShoppingCart className="w-12 h-12 text-white/90" />
       </div>
       <div>
-        <h2 className="font-display text-2xl font-bold text-white/60">Сагс хоосон байна</h2>
+        <h2 className="font-display text-2xl font-bold text-white/90">Сагс хоосон байна</h2>
         <p className="text-white/40 text-sm">Бараа нэмэхийн тулд дэлгүүр хэсье</p>
       </div>
       <Link href="/products"
-        className="inline-flex items-center gap-2 font-semibold px-7 py-2.5 rounded-full bg-white/80 text-black/80 text-sm">
+        className="inline-flex items-center gap-2 font-semibold px-7 py-2.5 rounded-full bg-rose-500 text-white/90 text-sm">
         🛒 Дэлгүүр хэсэх
       </Link>
     </div>

@@ -255,7 +255,7 @@ export default function ProductDetailPage() {
                 {product.sizes.map(s => (
                   <button key={s} onClick={() => setSize(s)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                      size === s ? "text-black/90 bg-white/90" : "glass-sm text-white/60 hover:text-white/80"
+                      size === s ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white/80"
                     }`}>
                     {s}
                   </button>
@@ -272,7 +272,7 @@ export default function ProductDetailPage() {
                 {product.colors.map(c => (
                   <button key={c} onClick={() => setColor(c)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium uppercase transition-all ${
-                      color === c ? "text-black/90 bg-white/90" : "glass-sm text-white/60 hover:text-white/80"
+                      color === c ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white/80"
                     }`}>
                     {c}
                   </button>
@@ -280,7 +280,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
           )}
-          {/* Quantity */}
+        {/* Quantity */}
         <div className="flex items-center justify-between glass rounded-2xl">
         <p className="text-xs tracking-[0.25em] text-white/90 uppercase font-medium">
             Тоо ширхэг
@@ -288,15 +288,15 @@ export default function ProductDetailPage() {
             <div className="flex items-center rounded-xl overflow-hidden border border-white/10 bg-white/10 backdrop-blur-md">
                 <button
                 onClick={() => setQty(q => Math.max(1, q - 1))}
-                className="px-3 py-2 text-white/60 hover:text-white transition-all">
+                className="px-2.5 py-1.5 text-white/60 hover:text-white transition-all">
                 <Minus size={16} />
                 </button>
-                <span className="px-5 py-2 text-sm font-semibold text-white min-w-[40px] text-center border-x border-white/10">
+                <span className="px-2.5 py-1.5 text-sm font-semibold text-white min-w-[40px] text-center border-x border-white/10">
                 {qty}
                 </span>
                 <button
                 onClick={() => setQty(q => q + 1)}
-                className="px-3 py-2 text-white/60 hover:text-white transition-all">
+                className="px-2.5 py-1.5 text-white/60 hover:text-white transition-all">
                 <Plus size={16} />
                 </button>
             </div>
@@ -305,7 +305,7 @@ export default function ProductDetailPage() {
           {/* Buttons */}
           <div className="flex gap-3">
             <button onClick={handleAddToCart}
-              className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-semibold text-sm transition-all hover:scale-[1.02] active:scale-98 bg-white/90 text-black/90">
+              className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-semibold text-sm transition-all hover:scale-[1.02] active:scale-98 bg-rose-500 text-white/90">
               <ShoppingCart size={18} />
               {added ? "Нэмэгдлээ ✓" : "Сагсанд нэмэх"}
             </button>
@@ -323,9 +323,9 @@ export default function ProductDetailPage() {
       {/* ── Related ── */}
       {related.length > 0 && (
         <section>
-          <p className="text-xs tracking-[0.25em] text-white/90 uppercase mb-2">Related</p>
+          {/* <p className="text-xs tracking-[0.25em] text-white/90 uppercase mb-2">Related</p> */}
           <h2 className="font-display text-2xl font-bold text-white mb-7">Төстэй бараанууд</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {related.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
