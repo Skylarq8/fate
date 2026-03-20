@@ -276,12 +276,6 @@ export default function CheckoutPage() {
                   <span className="text-green-400">-{fmt(productDiscount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-[14px]">
-                <span className="text-white/50">Хүргэлт</span>
-                <span className={shipping === 0 ? "text-green-400" : "text-white/70"}>
-                  {shipping === 0 ? "Үнэгүй" : fmt(shipping)}
-                </span>
-              </div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-[14px]">
                   <span className="text-white/50">
@@ -293,6 +287,12 @@ export default function CheckoutPage() {
                   <span className="text-green-400">-{fmt(couponDiscount)}</span>
                 </div>
               )}
+              <div className="flex justify-between text-[14px]">
+                <span className="text-white/50">Хүргэлт</span>
+                <span className={shipping === 0 ? "text-green-400" : "text-white/70"}>
+                  {shipping === 0 ? "Үнэгүй" : fmt(shipping)}
+                </span>
+              </div>
               <div className="flex justify-between font-bold pt-3 border-t border-white/10">
                 <span className="text-white text-[16px]">Нийт дүн</span>
                 <span className="text-white text-[16px]">{fmt(finalTotal)}</span>
