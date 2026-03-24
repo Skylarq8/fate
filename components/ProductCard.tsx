@@ -93,7 +93,7 @@ export default function ProductCard({ product }: Props) {
               <div className="flex items-center gap-2">
                 <p className="text-sm text-white/80 font-semibold">{fmt(price)}</p>
                 {product.discountEnabled && product.finalPrice && (
-                  <p className="text-xs text-white/35 line-through">{fmt(product.price)}</p>
+                  <p className="text-xs text-rose-500 line-through">{fmt(product.price)}</p>
                 )}
               </div>
             </div>

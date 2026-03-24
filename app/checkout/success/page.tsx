@@ -59,7 +59,7 @@ export default function CheckoutSuccessPage() {
 
   if (status === "error") return (
     <div className="max-w-lg min-h-[80vh] flex flex-col items-center justify-center mx-auto text-center space-y-4">
-      <p className="text-white/50">Алдаа гарлаа. Холбоо барина уу.</p>
+      {/* <p className="text-white/50">Алдаа гарлаа. Холбоо барина уу.</p> */}
     </div>
   )
 

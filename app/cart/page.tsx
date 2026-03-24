@@ -107,7 +107,7 @@ const finalTotal = subtotal - couponDiscount + shipping
         {/* <p className="text-[14px] text-red-400 underline" onClick={() => clearCart()}>Бүгдийг устгах</p> */}
         <Trash2 size={18} className="text-white hover:text-red-400" onClick={() => clearCart()}/>
       </div>
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-8 gap-x-10">
         {/* ── Items ── */}
         <div className="md:col-span-2 space-y-3">
           {items.map(item => (
@@ -132,7 +132,7 @@ const finalTotal = subtotal - couponDiscount + shipping
                   <div className="flex mt-2 flex-col justify-center pr-1">
                     <p className="text-white font-bold text-lg">{fmt(item.price)}</p>
                     {item.originalPrice && (
-                      <p className="text-white/50 line-through text-[14px] mt-0.5">{fmt(item.originalPrice)}</p>
+                      <p className="text-rose-500 line-through text-[14px] mt-0.5">{fmt(item.originalPrice)}</p>
                     )}
                   </div>
                 </div>
@@ -210,7 +210,7 @@ const finalTotal = subtotal - couponDiscount + shipping
             {shipping === 0 ? (
               <span className="text-green-400">Үнэгүй</span>
               ) : (
-                <span className="text-white/90">{shipping}₮</span>
+                <span className="text-white/90">{fmt(shipping)}</span>
               )
             }
           </div>
@@ -218,7 +218,7 @@ const finalTotal = subtotal - couponDiscount + shipping
           {/* 6. Final */}
           <div className="flex justify-between font-bold">
             <span className="text-white">Эцсийн нийт дүн</span>
-            <span className="text-white  text-lg">{fmt(finalTotal)}</span>
+            <span className="text-white text-lg">{fmt(finalTotal)}</span>
           </div>
         </div>
           {/* ── Coupon ── */}
@@ -230,7 +230,7 @@ const finalTotal = subtotal - couponDiscount + shipping
                   onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponResult(null) }}
                   onKeyDown={e => e.key === "Enter" && handleCoupon()}
                   placeholder="Хөнгөлөлтийн код оруулах"
-                  className="flex-1 glass-sm rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-rose-500/50 bg-transparent border border-rose-500/20"
+                  className="flex-1 text-base glass-sm rounded-xl px-3 py-2.5 text-white placeholder-white/50 outline-none focus:border-rose-500/50 bg-transparent border border-rose-500/20"
                 />
                 <button
                   onClick={handleCoupon}

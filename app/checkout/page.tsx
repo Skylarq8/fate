@@ -44,6 +44,19 @@ export default function CheckoutPage() {
     if (!phone.trim())           e.phone           = "Утасны дугаар оруулна уу"
     if (!email.trim())           e.email           = "И-мэйл оруулна уу"
     if (!shippingAddress.trim()) e.shippingAddress = "Хүргэлтийн хаяг оруулна уу"
+
+    if (!customerName.trim() || customerName.trim().length < 2)
+    e.customerName = "Нэр 2-оос дээш тэмдэгт байх ёстой"
+
+    if (!phone.trim() || !/^\d{8}$/.test(phone.trim()))
+      e.phone = "Утасны дугаар 8 оронтой тоо байх ёстой"
+
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      e.email = "И-мэйл хаяг буруу байна"
+
+    if(!shippingAddress.trim() || shippingAddress.trim().length < 5 && shippingAddress.trim().length >  30)
+      e.shippingAddress = "Хүргүүлэх хаягаа дэлгэрэнгүй бичнэ үү!"
+
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -145,7 +158,7 @@ export default function CheckoutPage() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-5">
+      <div className="grid md:grid-cols-3 gap-5 gap-x-10">
 
         {/* ── Left: form ── */}
         <div className="md:col-span-2">
@@ -168,7 +181,7 @@ export default function CheckoutPage() {
                     value={f.val}
                     onChange={e => { f.set(e.target.value); setErrors(p => ({ ...p, [f.key]: "" })) }}
                     placeholder={f.ph}
-                    className={`w-full glass-sm rounded-xl px-4 py-3 text-sm text-white placeholder-white/50 outline-none bg-transparent border transition-colors ${
+                    className={`w-full glass-sm text-base rounded-xl px-4 py-3 text-white placeholder-white/50 outline-none bg-transparent border transition-colors ${
                       errors[f.key] ? "border-red-500/50" : "border-white/25 focus:border-rose-500/50"
                     }`}
                   />
@@ -188,7 +201,7 @@ export default function CheckoutPage() {
           {step === "payment" && (
             <div className="space-y-4 fade-up">
               {/* customer summary */}
-              <div className="glass rounded-2xl py-5 -mt-5 space-y-3">
+              <div className="glass rounded-2xl py-5 -mt-5 space-y-5">
                 <div className="flex items-center pb-3 justify-between">
                   <h2 className="font-display text-xl font-bold text-white">Захиалагчийн мэдээлэл</h2>
                   <button onClick={() => setStep("info")} className="text-[14px] text-white/50 underline hover:text-white transition-colors">
@@ -196,14 +209,14 @@ export default function CheckoutPage() {
                   </button>
                 </div>
                 {[
-                  { icon: <User size={13} />,   val: customerName    },
-                  { icon: <Phone size={13} />,  val: phone           },
-                  { icon: <Mail size={13} />,   val: email           },
-                  { icon: <MapPin size={13} />, val: shippingAddress },
+                  { icon: <User size={20} />,   val: customerName    },
+                  { icon: <Phone size={20} />,  val: phone           },
+                  { icon: <Mail size={20} />,   val: email           },
+                  { icon: <MapPin size={20} />, val: shippingAddress },
                 ].map((r, i) => (
                   <div key={i} className="flex items-center gap-2.5 text-[16px] text-white/90">
-                    <span className="text-white/90 flex-shrink-0 text-[20px]">{r.icon}</span>
-                    {r.val}
+                    <span className="flex-shrink-0 text-white">{r.icon}</span>
+                    <span className="break-words max-w-[300px]">{r.val}</span>
                   </div>
                 ))}
               </div>
@@ -242,11 +255,16 @@ export default function CheckoutPage() {
 
         {/* ── Right: order summary ── */}
         <div>
-          <div className="glass rounded-2xl py-5 -mt-5 space-y-4 sticky top-24">
-            <h3 className="font-display font-bold text-white text-xl">Захиалгын дэлгэрэнгүй</h3>
+          {/* Нийт үнэ */}
+          <div className="flex justify-between font-bold py-5 border-t border-b border-rose-500/50">
+            <span className="text-white text-[18px]">Эцсийн нийт дүн</span>
+            <span className="text-white text-[22px]">{fmt(finalTotal)}</span>
+          </div>
+          <div className="glass rounded-2xl py-2 space-y-4 sticky top-24">
+            <h3 className="font-display font-bold text-white text-xl pb-2">Захиалгын дэлгэрэнгүй</h3>
 
             {/* items */}
-            <div className="space-y-3">
+            <div className="space-y-3 pb-2">
               {items.map(item => (
                 <div key={item.id} className="flex gap-3 items-start">
                   <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
@@ -266,7 +284,7 @@ export default function CheckoutPage() {
                   <div className="flex flex-col">
                     <span className="text-white text-[16px] font-semibold flex-shrink-0">{fmt(item.price * item.quantity)}</span>
                     {item.originalPrice && (
-                      <p className="text-white/50 line-through text-[13px] mt-0.5">{fmt(item.originalPrice)}</p>
+                      <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice)}</p>
                     )}
                   </div>
                 </div>
@@ -274,16 +292,16 @@ export default function CheckoutPage() {
             </div>
 
             {/* totals */}
-            <div className="border-t border-white/10 pt-4 space-y-2">
+            <div className="border-t border-rose-500/50 py-3 space-y-2 border-b">
               {productDiscount > 0 && (
                 <div className="flex justify-between text-[14px]">
-                  <span className="text-white/50">Барааны хямдрал</span>
+                  <span className="text-white/80">Барааны хямдрал</span>
                   <span className="text-green-400">-{fmt(productDiscount)}</span>
                 </div>
               )}
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-[14px]">
-                  <span className="text-white/50">
+                  <span className="text-white/80">
                     Купон хямдрал
                     {couponData?.discountPercent && (
                       <span className="ml-1 text-violet-400">{couponData.discountPercent}%</span>
@@ -293,14 +311,10 @@ export default function CheckoutPage() {
                 </div>
               )}
               <div className="flex justify-between text-[14px]">
-                <span className="text-white/50">Хүргэлт</span>
+                <span className="text-white/80">Хүргэлт</span>
                 <span className={shipping === 0 ? "text-green-400" : "text-white/70"}>
                   {shipping === 0 ? "Үнэгүй" : fmt(shipping)}
                 </span>
-              </div>
-              <div className="flex justify-between font-bold pt-3 border-t border-white/10">
-                <span className="text-white text-[16px]">Нийт дүн</span>
-                <span className="text-white text-[16px]">{fmt(finalTotal)}</span>
               </div>
             </div>
           </div>
