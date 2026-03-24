@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         customer_email: email,
-        success_url: `http://localhost:3000/checkout/success`,
-        cancel_url:  `http://localhost:3000/checkout`,
+        success_url: `${process.env.NEXT_PUBLIC_URL}/checkout/success`,
+        cancel_url:  `${process.env.NEXT_PUBLIC_URL}/checkout`,
         items: [
           {
             price_data: {
