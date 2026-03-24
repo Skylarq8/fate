@@ -48,37 +48,43 @@ export default function CheckoutPage() {
     return Object.keys(e).length === 0
   }
 
-  const handleSubmitOrder = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName,
-          phone,
-          shippingAddress,
-          items: items.map(i => ({
-            productId: i.productId,
-            quantity:  i.quantity,
-            size:      i.size,
-            color:     i.color,
-            unitPrice: i.price,
-          })),
-          totalAmount:  finalTotal,
-          couponCode:   couponData?.code,
-        }),
-      })
-      if (res.ok) {
-        clearCart()
-        setStep("success")
-      }
-    } catch {
-      // handle error
-    } finally {
-      setLoading(false)
-    }
+ const handleSubmitOrder = async () => {
+  setLoading(true)
+  try {
+    const bylRes = await fetch("/api/payment/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        finalTotal,
+        email,
+      }),
+    })
+
+    const bylData = await bylRes.json()
+    
+    // Order мэдээллийг sessionStorage-д хадгална
+    sessionStorage.setItem("pendingOrder", JSON.stringify({
+      customerName,
+      phone,
+      email,
+      shippingAddress,
+      couponCode: couponData?.code,
+      totalAmount: finalTotal,
+      items: items.map(i => ({
+        productId: i.productId,
+        quantity:  i.quantity,
+        size:      i.size,
+        color:     i.color,
+        unitPrice: i.price,
+      })),
+    }))
+    window.location.href = bylData.url
+  } catch (err) {
+    console.log("ERROR:", err)
+  } finally {
+    setLoading(false)
   }
+}
 
   // ── Empty cart ──────────────────────────────────────────────────────────
   if (items.length === 0 && step !== "success") return (
@@ -117,7 +123,7 @@ export default function CheckoutPage() {
       </Link>
 
       {/* ── Steps ── */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-5">
         {(["info", "payment"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center gap-3">
             <div className={`flex items-center gap-2 text-sm font-medium transition-colors ${
@@ -139,7 +145,7 @@ export default function CheckoutPage() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-5">
 
         {/* ── Left: form ── */}
         <div className="md:col-span-2">
@@ -148,7 +154,6 @@ export default function CheckoutPage() {
           {step === "info" && (
             <div className="glass rounded-2xl space-y-5 fade-up">
               <h2 className="font-display text-xl font-bold text-white">Захиалагчийн мэдээлэл</h2>
-
               {[
                 { icon: <User size={16} />,   label: "Нэр",              val: customerName,    set: setCustomerName,    key: "customerName",    ph: "Нэрээ оруулна уу!" },
                 { icon: <Phone size={16} />,  label: "Утасны дугаар",    val: phone,           set: setPhone,           key: "phone",           ph: "Утасны дугаараа оруулна уу!" },
@@ -204,7 +209,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* payment placeholder */}
-              <div className="glass rounded-2xl py-5 -mt-5 space-y-4">
+              {/* <div className="glass rounded-2xl py-5 -mt-5 space-y-4">
                 <h2 className="font-display text-lg font-bold text-white">Төлбөрийн хэрэгсэл</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {["QPay", "SocialPay", "Khan Bank", "Golomt"].map(method => (
@@ -220,7 +225,7 @@ export default function CheckoutPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               <button
                 onClick={handleSubmitOrder}
