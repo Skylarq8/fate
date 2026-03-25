@@ -237,7 +237,7 @@ export const HeroHeader = () => {
                   {/* Search */}
                   <button onClick={() => setSearchOpen(true)}
                     className="text-white p-2 px-2.5 rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50">
-                    <Search className="h-[1.2rem] w-[1.2rem]"/>
+                    <Search size={17}/>
                   </button>
 
                   {/* Wishlist */}
