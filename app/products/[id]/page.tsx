@@ -215,7 +215,7 @@ export default function ProductDetailPage() {
             <span className="text-3xl font-bold text-white">{fmt(price)}</span>
             {product.discountEnabled && product.finalPrice && (
               <>
-                <span className="text-white/50 line-through text-xl">{fmt(product.price)}</span>
+                <span className="text-rose-500 line-through text-xl">{fmt(product.price)}</span>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white bg-red-500">
                   -{Math.round((1 - product.finalPrice / product.price) * 100)}%
                 </span>

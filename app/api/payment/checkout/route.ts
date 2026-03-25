@@ -23,7 +23,9 @@ export async function POST(req: NextRequest) {
           {
             price_data: {
               unit_amount: finalTotal,
-              product_data: { name: "Захиалга" },
+              product_data: { 
+                name: "Захиалга",
+              },
             },
             quantity: 1,
           },
