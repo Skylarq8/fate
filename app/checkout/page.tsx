@@ -133,7 +133,7 @@ function AddressSheet({ open, onClose, onSave }: {
               onClick={() => setType(t.key as AddressType)}
               className={`flex-1 flex items-center justify-center gap-x-0.5 py-2.5 rounded-xl text-sm font-medium border transition-all ${
                 type === t.key
-                  ? "bg-rose-500/50 text-white/90 border-rose-500"
+                  ? "bg-rose-500/50 text-white border-rose-500"
                   : "text-white/60 border-white/15 hover:border-white/30"
               }`}
             >
