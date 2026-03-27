@@ -100,9 +100,9 @@ export default function ProductCard({ product }: Props) {
 
             <div className="flex flex-row items-center gap-x-1.5 mt-2" onClick={e => e.preventDefault()}>
               <button onClick={handleWishlist}
-                className="p-2 rounded-sm glass-sm backdrop-blur-md hover:bg-red-500/80 transition-all border border-white/20 text-white/90"
+                className="p-2 rounded-sm glass-sm backdrop-blur-md hover:bg-rose-500 transition-all border border-white/20 text-white/90"
                 style={liked ? { border: "1px solid rgba(239,68,68,0.4)", background: "rgba(239,68,68,0.15)" } : {}}>
-                <Heart size={15} className={liked ? "fill-red-500 text-red-500" : "text-white/60"} />
+                <Heart size={15} className={liked ? "fill-rose-500 text-rose-500" : "text-white/90"}/>
               </button>
               <button onClick={handleAddToCart}
                 className="flex-1 py-2 gap-x-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-sm hover:bg-rose-500 text-white/90 font-body text-[13px] transition h-8 flex items-center justify-center">

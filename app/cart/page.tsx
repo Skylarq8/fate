@@ -270,11 +270,6 @@ const finalTotal = subtotal - couponDiscount + shipping
           </div>
         </div>
       </div>
-      <p className="font-body font-medium text-center text-sm lg:text-[16px] mt-10 lg:mt-30 text-white/90">Хүмүүсийн нийтлэг асуудаг асуултууд</p>
-          <h1 className="font-heading font-semibold text-center text-2xl mt-3 text-white/90">FAQ</h1>
-          <div className="flex justify-center mt-3">
-            <Accordin/>
-          </div>
     </div>
   )
 }

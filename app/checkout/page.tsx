@@ -93,7 +93,7 @@ function AddressSheet({ open, onClose, onSave }: {
   if (!open) return null
 
   return (
-    <div className="flex justify-center items-start">
+    <div className="flex justify-center items-start mt-30">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
@@ -475,10 +475,6 @@ export default function CheckoutPage() {
 
           {/* Right: order summary */}
           <div>
-            <div className="flex justify-between font-bold py-5 border-t border-b border-rose-500/50">
-              <span className="text-white text-[18px]">Эцсийн нийт дүн</span>
-              <span className="text-white text-lg">{fmt(finalTotal)}</span>
-            </div>
             <div className="glass rounded-2xl py-2 space-y-4 sticky top-24">
               <h3 className="font-display font-bold text-white text-xl pb-2">Захиалгын дэлгэрэнгүй</h3>
               <div className="space-y-3 pb-2">
@@ -501,7 +497,7 @@ export default function CheckoutPage() {
                     <div className="flex flex-col">
                       <span className="text-white text-[16px] font-semibold flex-shrink-0">{fmt(item.price * item.quantity)}</span>
                       {item.originalPrice && (
-                        <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice)}</p>
+                        <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice * item.quantity)}</p>
                       )}
                     </div>
                   </div>
@@ -530,6 +526,10 @@ export default function CheckoutPage() {
                     {shipping === 0 ? "Үнэгүй" : fmt(shipping)}
                   </span>
                 </div>
+              </div>
+              <div className="flex justify-between font-bold border-rose-500/50">
+                <span className="text-white text-[18px]">Эцсийн нийт дүн</span>
+                <span className="text-white text-lg">{fmt(finalTotal)}</span>
               </div>
             </div>
           </div>
