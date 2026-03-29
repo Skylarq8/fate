@@ -6,34 +6,10 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPin, ShoppingBag, CheckCircle, X, Home, Building2, Briefcase } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 import { fmt } from "@/lib/api"
+import { CITIES, getDistricts, getKhoroos } from "@/lib/data/location"
 
 type Step = "info" | "payment" | "success"
 type AddressType = "apartment" | "house" | "office"
-
-// ── Монгол хаягийн өгөгдөл ───────────────────────────────────────────────
-const DISTRICTS: Record<string, string[]> = {
-  "Улаанбаатар": ["Баянгол", "Баянзүрх", "Сүхбаатар", "Хан-Уул", "Чингэлтэй", "Сонгинохайрхан", "Налайх", "Багануур", "Багахангай"],
-  "Дархан-Уул": ["Дархан", "Орхон", "Хонгор", "Шарын гол"],
-  "Орхон": ["Баян-Өндөр", "Жаргалант"],
-}
-
-const KHOROOS: Record<string, string[]> = {
-  "Баянгол": Array.from({ length: 20 }, (_, i) => `${i + 1}-р хороо`),
-  "Баянзүрх": Array.from({ length: 24 }, (_, i) => `${i + 1}-р хороо`),
-  "Сүхбаатар": Array.from({ length: 12 }, (_, i) => `${i + 1}-р хороо`),
-  "Хан-Уул": Array.from({ length: 16 }, (_, i) => `${i + 1}-р хороо`),
-  "Чингэлтэй": Array.from({ length: 18 }, (_, i) => `${i + 1}-р хороо`),
-  "Сонгинохайрхан": Array.from({ length: 32 }, (_, i) => `${i + 1}-р хороо`),
-  "Налайх": Array.from({ length: 6 }, (_, i) => `${i + 1}-р хороо`),
-  "Багануур": Array.from({ length: 5 }, (_, i) => `${i + 1}-р хороо`),
-  "Багахангай": Array.from({ length: 2 }, (_, i) => `${i + 1}-р хороо`),
-  "Дархан": Array.from({ length: 10 }, (_, i) => `${i + 1}-р хороо`),
-  "Орхон": Array.from({ length: 8 }, (_, i) => `${i + 1}-р хороо`),
-  "Хонгор": Array.from({ length: 5 }, (_, i) => `${i + 1}-р хороо`),
-  "Шарын гол": Array.from({ length: 4 }, (_, i) => `${i + 1}-р хороо`),
-  "Баян-Өндөр": Array.from({ length: 8 }, (_, i) => `${i + 1}-р хороо`),
-  "Жаргалант": Array.from({ length: 4 }, (_, i) => `${i + 1}-р хороо`),
-}
 
 // ── Address Bottom Sheet ─────────────────────────────────────────────────
 function AddressSheet({ open, onClose, onSave }: {
@@ -45,24 +21,53 @@ function AddressSheet({ open, onClose, onSave }: {
   const [city, setCity]         = useState("Улаанбаатар")
   const [district, setDistrict] = useState("")
   const [khoroo, setKhoroo]     = useState("")
+  // apartment
   const [building, setBuilding] = useState("")
   const [door, setDoor]         = useState("")
+  // house
+  const [houseNum, setHouseNum] = useState("")
+  const [streetNum, setStreetNum] = useState("")
+  // office
+  const [officeBuilding, setOfficeBuilding] = useState("")
+  const [officeFloor, setOfficeFloor]       = useState("")
+  const [officeDoor, setOfficeDoor]         = useState("")
+  const [officeName, setOfficeName]         = useState("")
+  // common
   const [extra, setExtra]       = useState("")
   const [errors, setErrors]     = useState<Record<string, string>>({})
 
-  const districts = DISTRICTS[city] ?? []
-  const khoroos   = KHOROOS[district] ?? []
+  const districts = getDistricts(city)
+  const khoroos   = getKhoroos(district)
 
   const handleSave = () => {
     const e: Record<string, string> = {}
     if (!district) e.district = "Дүүрэг сонгоно уу"
     if (!khoroo)   e.khoroo   = "Хороо сонгоно уу"
-    if (!building.trim()) e.building = "Байрны дугаар оруулна уу"
-    if (!door.trim())     e.door     = "Тоот оруулна уу"
+ 
+    if (type === "apartment") {
+      if (!building.trim()) e.building = "Байрны дугаар оруулна уу"
+      if (!door.trim())     e.door     = "Тоот оруулна уу"
+    } else if (type === "house") {
+      if (!houseNum.trim())  e.houseNum  = "Байшингийн дугаар оруулна уу"
+      if (!streetNum.trim()) e.streetNum = "Гудамжны дугаар оруулна уу"
+    } else if (type === "office") {
+      if (!officeBuilding.trim()) e.officeBuilding = "Барилгын нэр оруулна уу"
+      if (!officeFloor.trim())    e.officeFloor    = "Давхар оруулна уу"
+      if (!officeDoor.trim())     e.officeDoor     = "Тоот оруулна уу"
+      if (!officeName.trim())     e.officeName     = "Оффисын нэр оруулна уу"
+    }
+ 
     setErrors(e)
     if (Object.keys(e).length > 0) return
-
-    const parts = [city, district, khoroo, `${building}-р байр`, `${door}-р тоот`]
+ 
+    let parts: string[] = [city, district, khoroo]
+    if (type === "apartment") {
+      parts = [...parts, `${building}-р байр`, `${door}-р тоот`]
+    } else if (type === "house") {
+      parts = [...parts, `${streetNum}-р гудамж`, `${houseNum}-р байшин`]
+    } else if (type === "office") {
+      parts = [...parts, officeBuilding, `${officeFloor}-р давхар`, `${officeDoor}-р тоот`, officeName]
+    }
     if (extra.trim()) parts.push(extra.trim())
     onSave(parts.join(", "))
     onClose()
@@ -117,123 +122,197 @@ function AddressSheet({ open, onClose, onSave }: {
         {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 p-5 space-y-3 pb-0">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold text-white">Хаяг оруулах</h3>
-          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Type selector */}
-        <div className="flex gap-x-2">
-          {types.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setType(t.key as AddressType)}
-              className={`flex-1 flex items-center justify-center gap-x-0.5 py-2.5 rounded-xl text-sm font-medium border transition-all ${
-                type === t.key
-                  ? "bg-rose-500/50 text-white border-rose-500"
-                  : "text-white/60 border-white/15 hover:border-white/30"
-              }`}
-            >
-              {t.icon} {t.label}
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg font-bold text-white">Хаяг оруулах</h3>
+            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+              <X size={20} />
             </button>
-          ))}
-        </div>
-
-        {/* City */}
-        <div className="space-y-1.5">
-          <label className="text-xs text-white/60 uppercase tracking-wide">Хот / Аймаг <span className="text-rose-500">*</span></label>
-          <div className="relative">
-            <select
-              value={city}
-              onChange={e => { setCity(e.target.value); setDistrict(""); setKhoroo("") }}
-              className={selectClass("")}
-            >
-              {Object.keys(DISTRICTS).map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-white/40 pointer-events-none" />
           </div>
-        </div>
 
-        {/* District */}
-        <div className="space-y-1.5">
-          <label className="text-xs text-white/60 uppercase tracking-wide">Дүүрэг / Сум <span className="text-rose-500">*</span></label>
-          <div className="relative">
-            <select
-              value={district}
-              onChange={e => { setDistrict(e.target.value); setKhoroo("") }}
-              className={selectClass("district")}
-            >
-              <option value="">Сонгох...</option>
-              {districts.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-white/40 pointer-events-none" />
+          {/* Type selector */}
+          <div className="flex gap-x-2">
+            {types.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setType(t.key as AddressType)}
+                className={`flex-1 flex items-center justify-center gap-x-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+                  type === t.key
+                    ? "bg-rose-500/20 text-white border-rose-500/60"
+                    : "text-white/50 border-white/15 hover:border-white/30"
+                }`}
+              >
+                {t.icon} {t.label}
+              </button>
+            ))}
           </div>
-          {errors.district && <p className="text-xs text-red-400">{errors.district}</p>}
-        </div>
 
-        {/* Khoroo */}
-        <div className="space-y-1.5">
-          <label className="text-xs text-white/60 uppercase tracking-wide">Хороо / Баг <span className="text-rose-500">*</span></label>
-          <div className="relative">
-            <select
-              value={khoroo}
-              onChange={e => setKhoroo(e.target.value)}
-              className={selectClass("khoroo")}
-              disabled={!district}
-            >
-              <option value="">Сонгох...</option>
-              {khoroos.map(k => <option key={k} value={k}>{k}</option>)}
-            </select>
-            <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-white/40 pointer-events-none" />
-          </div>
-          {errors.khoroo && <p className="text-xs text-red-400">{errors.khoroo}</p>}
-        </div>
-
-        {/* Building + Door */}
-        <div className="grid grid-cols-2 gap-3">
+          {/* City */}
           <div className="space-y-1.5">
-            <label className="text-xs text-white/60 uppercase tracking-wide">Байр <span className="text-rose-500">*</span></label>
-            <input
-              value={building}
-              onChange={e => { setBuilding(e.target.value); setErrors(p => ({ ...p, building: "" })) }}
-              placeholder="Байрны дугаар"
-              className={inputClass("building")}
-            />
-            {errors.building && <p className="text-xs text-red-400">{errors.building}</p>}
+            <label className="text-xs text-white/60 uppercase tracking-wide">Хот / Аймаг <span className="text-rose-500">*</span></label>
+            <div className="relative">
+              <select
+                value={city}
+                onChange={e => { setCity(e.target.value); setDistrict(""); setKhoroo("") }}
+                className={selectClass("")}
+              >
+                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-white/40 pointer-events-none" />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-white/60 uppercase tracking-wide">Тоот <span className="text-rose-500">*</span></label>
-            <input
-              value={door}
-              onChange={e => { setDoor(e.target.value); setErrors(p => ({ ...p, door: "" })) }}
-              placeholder="Хаалганы тоот"
-              className={inputClass("door")}
-            />
-            {errors.door && <p className="text-xs text-red-400">{errors.door}</p>}
-          </div>
-        </div>
 
-        {/* Extra */}
-        <div className="space-y-1.5">
-          <label className="text-xs text-white/60 uppercase tracking-wide">Нэмэлт мэдээлэл</label>
-          <input
-            value={extra}
-            onChange={e => setExtra(e.target.value)}
-            placeholder="Нэмэлт мэдээлэл оруулна уу"
-            className={inputClass("")}
-          />
-          <p className="text-xs text-white/70">Орц, давхар, орцны код гэх мэт</p>
-        </div>
+          {/* District */}
+          <div className="space-y-1.5">
+            <label className="text-xs text-white/60 uppercase tracking-wide">Дүүрэг / Сум <span className="text-rose-500">*</span></label>
+            <div className="relative">
+              <select
+                value={district}
+                onChange={e => { setDistrict(e.target.value); setKhoroo("") }}
+                className={selectClass("district")}
+              >
+                <option value="">Сонгох...</option>
+                {districts.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-white/40 pointer-events-none" />
+            </div>
+            {errors.district && <p className="text-xs text-red-400">{errors.district}</p>}
+          </div>
+
+          {/* Khoroo */}
+          <div className="space-y-1.5">
+            <label className="text-xs text-white/60 uppercase tracking-wide">Хороо / Баг <span className="text-rose-500">*</span></label>
+            <div className="relative">
+              <select
+                value={khoroo}
+                onChange={e => setKhoroo(e.target.value)}
+                className={selectClass("khoroo")}
+                disabled={!district}
+              >
+                <option value="">Сонгох...</option>
+                {khoroos.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
+              <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-white/40 pointer-events-none" />
+            </div>
+            {errors.khoroo && <p className="text-xs text-red-400">{errors.khoroo}</p>}
+          </div>
+
+          {/* Орон сууц */}
+          {type === "apartment" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Байр <span className="text-rose-500">*</span></label>
+                <input
+                  value={building}
+                  onChange={e => { setBuilding(e.target.value); setErrors(p => ({ ...p, building: "" })) }}
+                  placeholder="Байрны дугаар"
+                  className={inputClass("building")}
+                />
+                {errors.building && <p className="text-xs text-red-400">{errors.building}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Тоот <span className="text-rose-500">*</span></label>
+                <input
+                  value={door}
+                  onChange={e => { setDoor(e.target.value); setErrors(p => ({ ...p, door: "" })) }}
+                  placeholder="Хаалганы тоот"
+                  className={inputClass("door")}
+                />
+                {errors.door && <p className="text-xs text-red-400">{errors.door}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Байшин */}
+          {type === "house" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Байшин дугаар <span className="text-rose-500">*</span></label>
+                <input
+                  value={houseNum}
+                  onChange={e => { setHouseNum(e.target.value); setErrors(p => ({ ...p, houseNum: "" })) }}
+                  placeholder="Байшингийн дугаар"
+                  className={inputClass("houseNum")}
+                />
+                {errors.houseNum && <p className="text-xs text-red-400">{errors.houseNum}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Гудамж дугаар <span className="text-rose-500">*</span></label>
+                <input
+                  value={streetNum}
+                  onChange={e => { setStreetNum(e.target.value); setErrors(p => ({ ...p, streetNum: "" })) }}
+                  placeholder="Гудамжны дугаар"
+                  className={inputClass("streetNum")}
+                />
+                {errors.streetNum && <p className="text-xs text-red-400">{errors.streetNum}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Оффис */}
+          {type === "office" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Барилга <span className="text-rose-500">*</span></label>
+                <input
+                  value={officeBuilding}
+                  onChange={e => { setOfficeBuilding(e.target.value); setErrors(p => ({ ...p, officeBuilding: "" })) }}
+                  placeholder="Барилгын нэр"
+                  className={inputClass("officeBuilding")}
+                />
+                {errors.officeBuilding && <p className="text-xs text-red-400">{errors.officeBuilding}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Давхар <span className="text-rose-500">*</span></label>
+                <input
+                  value={officeFloor}
+                  onChange={e => { setOfficeFloor(e.target.value); setErrors(p => ({ ...p, officeFloor: "" })) }}
+                  placeholder="Давхар"
+                  className={inputClass("officeFloor")}
+                />
+                {errors.officeFloor && <p className="text-xs text-red-400">{errors.officeFloor}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Тоот <span className="text-rose-500">*</span></label>
+                <input
+                  value={officeDoor}
+                  onChange={e => { setOfficeDoor(e.target.value); setErrors(p => ({ ...p, officeDoor: "" })) }}
+                  placeholder="Тоот дугаар"
+                  className={inputClass("officeDoor")}
+                />
+                {errors.officeDoor && <p className="text-xs text-red-400">{errors.officeDoor}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-white/60 uppercase tracking-wide">Оффисын нэр <span className="text-rose-500">*</span></label>
+                <input
+                  value={officeName}
+                  onChange={e => { setOfficeName(e.target.value); setErrors(p => ({ ...p, officeName: "" })) }}
+                  placeholder="Оффисын нэр"
+                  className={inputClass("officeName")}
+                />
+                {errors.officeName && <p className="text-xs text-red-400">{errors.officeName}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Нэмэлт мэдээлэл — бүх type-д */}
+          <div className="space-y-1.5 pb-4">
+            <label className="text-xs text-white/60 uppercase tracking-wide">Нэмэлт мэдээлэл</label>
+            <input
+              value={extra}
+              onChange={e => setExtra(e.target.value)}
+              placeholder="Орц, давхар, орцны код гэх мэт"
+              className={inputClass("")}
+            />
+          </div>
+
         </div>
 
         {/* Save — sticky bottom */}
-        <div className="p-4 mb-15 lg:mb-0 border-t border-white/10 flex-shrink-0">
+        <div className="p-4 border-t border-white/10 flex-shrink-0">
           <button
             onClick={handleSave}
-            className="w-full py-3.5 rounded-2xl font-semibold text-sm bg-rose-500 text-white/90 transition-all hover:bg-white/90 active:scale-98"
+            className="w-full py-3.5 rounded-2xl font-semibold text-sm bg-rose-500 text-white transition-all hover:bg-rose-600 active:scale-98"
           >
             Хадгалах
           </button>
