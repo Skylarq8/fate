@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Heart, Home, Package, ShoppingCart, User } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
@@ -8,9 +8,12 @@ import { useCartStore } from "@/store/cartStore";
 
 export default function MobileNav() {
   const [show, setShow] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  // const [lastScrollY, setLastScrollY] = useState(0);
   const { wishlist } = useWishlist();
   const { items } = useCartStore();
+
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
 
   // useEffect(() => {
   //   const handleScroll = () => {
@@ -25,6 +28,29 @@ export default function MobileNav() {
   //   window.addEventListener("scroll", handleScroll);
   //   return () => window.removeEventListener("scroll", handleScroll);
   // }, [lastScrollY]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      // жижиг scroll ignore (5px-аас бага бол тоохгүй)
+      if (Math.abs(currentScroll - lastScrollY.current) < 10) return;
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          if (currentScroll > lastScrollY.current) {
+            setShow(false); // доош → нуух
+          } else {
+            setShow(true); // дээш → харуулах
+          }
+          lastScrollY.current = currentScroll;
+          ticking.current = false;
+        });
+
+        ticking.current = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <nav
@@ -41,17 +67,17 @@ export default function MobileNav() {
           Бүх бараа
         </Link>
         <Link href="/wishlist" className="flex flex-col items-center text-xs relative">
-        {/* {wishlist.length > 0 && (
-          <span className="absolute -top-3 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+        {wishlist.length > 0 && (
+          <span className="absolute -top-3 right-1 bg-rose-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
             {wishlist.length}
              </span>
-         )} */}
+         )}
           <Heart size={20} />
           Таалагдсан
         </Link>
         <Link href="/cart" className="flex flex-col items-center text-xs">
           {items.length > 0 && (
-            <span className="absolute -top-2 -right-2 mr-3 mt-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+            <span className="absolute -top-2 -right-2 mr-6 mt-2 bg-rose-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
               {items.length}
               </span>
           )}

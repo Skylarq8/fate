@@ -100,8 +100,7 @@ const finalTotal = subtotal - couponDiscount + shipping
 
   return (
     <div className="max-w-6xl mx-auto pt-3 fade-up">
-
-      <div className="flex items-end justify-between mb-5">
+      <div className="flex items-end justify-between mb-3">
         <div>
           <h1 className="font-display text-3xl font-bold text-white">Миний сагс</h1>
         </div>
@@ -177,7 +176,7 @@ const finalTotal = subtotal - couponDiscount + shipping
             </div>
             
  
-            <div className="space-y-2 border-t border-rose-500/50 pt-4">
+          <div className="space-y-2 border-t border-rose-500/50 pt-4">
 
           {/* 1. Нийт үнэ */}
           <div className="flex justify-between text-sm">

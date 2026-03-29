@@ -309,7 +309,7 @@ function AddressSheet({ open, onClose, onSave }: {
         </div>
 
         {/* Save — sticky bottom */}
-        <div className="p-4 border-t border-white/10 flex-shrink-0">
+        <div className="p-4 border-t border-white/10 flex-shrink-0 mb-15 md:mb-0">
           <button
             onClick={handleSave}
             className="w-full py-3.5 rounded-2xl font-semibold text-sm bg-rose-500 text-white transition-all hover:bg-rose-600 active:scale-98"
@@ -416,7 +416,7 @@ export default function CheckoutPage() {
         }}
       />
 
-      <div className="max-w-5xl mx-auto pt-3 pb-8 fade-up">
+      <div className="max-w-6xl mx-auto pt-3 pb-8 fade-up">
 
         {/* Back */}
         <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors mb-6">
@@ -446,10 +446,10 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 gap-x-10">
+        <div className="grid md:grid-cols-5 gap-5 gap-x-10">
 
           {/* Left */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-3">
 
             {/* Step 1: Info */}
             {step === "info" && (
@@ -553,27 +553,27 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right: order summary */}
-          <div>
+          <div className="md:col-span-2">
             <div className="glass rounded-2xl py-2 space-y-4 sticky top-24">
               <h3 className="font-display font-bold text-white text-xl pb-2">Захиалгын дэлгэрэнгүй</h3>
               <div className="space-y-3 pb-2">
                 {items.map(item => (
                   <div key={item.id} className="flex gap-3 items-start">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
+                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
                       {item.image
                         ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                         : <div className="w-full h-full bg-white/5" />
                       }
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-[16px] font-medium line-clamp-1">{item.title}</p>
+                      <p className="text-white text-[18px] font-medium line-clamp-1">{item.title}</p>
                       <div className="flex gap-1 mt-0.5 items-center">
                         {item.size  && <span className="text-white/50 text-[14px]">{item.size}</span>}
                         {item.color && <span className="text-white/50 text-[14px] capitalize">· {item.color}</span>}
                         <span className="text-white/50 text-[14px]">· {item.quantity}ш</span>
                       </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-end">
                       <span className="text-white text-[16px] font-semibold flex-shrink-0">{fmt(item.price * item.quantity)}</span>
                       {item.originalPrice && (
                         <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice * item.quantity)}</p>
