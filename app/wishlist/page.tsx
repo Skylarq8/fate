@@ -24,7 +24,7 @@ export default function WishlistPage() {
     status:          "active",
     createdAt:       item.createdAt ?? new Date().toISOString(),
     images:          item.image ? [{ id: "0", url: item.image, isPrimary: true, order: 0 }] : [],
-    categories:      item.category ? [{ category: { id: "0", name: item.category, slug: "" } }] : [],
+    categories:      item.category ? [{ category: { id: "0", name: item.category, slug: "", parentId: null, children: [] } }] : [],
   })
 
   return (
