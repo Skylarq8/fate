@@ -3,7 +3,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
 // ── Simple in-memory cache ────────────────────────────────────────────────────
 const cache = new Map<string, { data: any; ts: number }>()
-const CACHE_TTL = 600_000 // 60 секунд
+const CACHE_TTL = 60_000
 
 async function cachedFetch(url: string) {
   const hit = cache.get(url)
@@ -14,17 +14,25 @@ async function cachedFetch(url: string) {
   return data
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 export interface ProductImage {
-  id: string
-  url: string
-  isPrimary: boolean
-  order: number
+  id: string; url: string; isPrimary: boolean; order: number; variantColor?: string | null
 }
 
 export interface Category {
   id: string
   name: string
   slug: string
+  parentId: string | null
+  _count?: { products: number }
+  children: Category[]
+}
+
+export interface VariantOption {
+  id: string
+  label: string
+  values: string[]
+  order: number
 }
 
 export interface Product {
@@ -41,17 +49,12 @@ export interface Product {
   createdAt: string
   images: ProductImage[]
   categories: { category: Category }[]
+  variants?: VariantOption[]
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
-export async function getProducts(params?: {
-  categoryId?: string
-  sort?: string
-}): Promise<Product[]> {
-  const query = new URLSearchParams()
-  if (params?.categoryId) query.set("categoryId", params.categoryId)
-  if (params?.sort)       query.set("sort", params.sort)
-  const data = await cachedFetch(`${BASE_URL}/api/products?${query}`)
+export async function getProducts(): Promise<Product[]> {
+  const data = await cachedFetch(`${BASE_URL}/api/products`)
   return (data.data ?? []).filter((p: Product) => p.status === "active")
 }
 
@@ -60,10 +63,20 @@ export async function getProduct(id: string): Promise<Product | null> {
   return data.data ?? null
 }
 
-// ── Categories ────────────────────────────────────────────────────────────────
+// ── Categories (tree) ─────────────────────────────────────────────────────────
 export async function getCategories(): Promise<Category[]> {
   const data = await cachedFetch(`${BASE_URL}/api/categories`)
   return data.data ?? []
+}
+
+// Tree-г flat болгох helper
+export function flattenCategories(cats: Category[]): Category[] {
+  const result: Category[] = []
+  const flatten = (list: Category[]) => {
+    list.forEach(c => { result.push(c); flatten(c.children ?? []) })
+  }
+  flatten(cats)
+  return result
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

@@ -26,7 +26,10 @@ export default function AddToCartSheet({ product, onClose }: Props) {
   const [mounted, setMounted] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
 
-  const img   = primaryImage(product)
+  const img =
+    product.images.find(i => i.variantColor === color) || 
+    product.images.find(i => i.isPrimary) ||
+    product.images[0]  
   const price = product.discountEnabled && product.finalPrice
     ? product.finalPrice : product.price
 
@@ -54,16 +57,21 @@ export default function AddToCartSheet({ product, onClose }: Props) {
   }
 
   const handleAdd = () => {
+    const imgToAdd =
+      product.images.find(i => i.variantColor === color) ||
+      product.images.find(i => i.isPrimary) ||
+      product.images[0]
+
     addItem({
-      productId:     product.id,
-      title:         product.title,
+      productId: product.id,
+      title: product.title,
       price,
-      originalPrice: product.discountEnabled && product.finalPrice ? product.price : undefined,
-      image:         img?.url ?? "",
+      image: imgToAdd?.url ?? "",
       size,
       color,
       quantity: qty,
     })
+
     setAdded(true)
     showToast("🛒 Сагсанд нэмэгдлээ")
     setTimeout(handleClose, 900)

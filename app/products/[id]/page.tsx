@@ -15,6 +15,9 @@ import Accordin from "@/components/Accordin"
 import Footer from "@/components/Footer"
 import { useRouter } from "next/navigation"
 
+
+type SelectedVariants = Record<string, string>;
+
 export default function ProductDetailPage() {
   const { id }    = useParams<{ id: string }>()
   const addItem   = useCartStore(s => s.addItem)
@@ -22,6 +25,9 @@ export default function ProductDetailPage() {
   const { showToast } = useToast()
   const router = useRouter()
 
+  const [selectedVariants, setSelectedVariants] = useState<SelectedVariants>({});
+  const [selectedColor, setSelectedColor] = useState<string>("")
+  const [mainImage, setMainImage] = useState<string>("")
   const [product,   setProduct]   = useState<Product | null>(null)
   const [related,   setRelated]   = useState<Product[]>([])
   const [loading,   setLoading]   = useState(true)
@@ -30,6 +36,7 @@ export default function ProductDetailPage() {
   const [color,     setColor]     = useState("")
   const [timeLeft, setTimeLeft] = useState("")
   const [qty,       setQty]       = useState(1)
+  const [touchStartX, setTouchStartX] = useState(0);
   const [added,     setAdded]     = useState(false)
   const [remainingTime, setRemainingTime] = useState<{
     days: number
@@ -38,6 +45,27 @@ export default function ProductDetailPage() {
     seconds: number
     totalMs: number
   } | null>(null)
+
+  useEffect(() => {
+    if (!product) return;
+    const img = product.images[activeImg];
+    if (img?.variantColor) setSelectedColor(img.variantColor);
+  }, [activeImg, product]);
+
+  useEffect(() => {
+    if (!product) return
+    setMainImage(sorted[activeImg]?.url || "")
+  }, [activeImg, product])
+
+  useEffect(() => {
+    if (!product) return;
+
+    const defaultVariants: SelectedVariants = {};
+    product.variants?.forEach(v => {
+      if (v.values.length > 0) defaultVariants[v.label] = v.values[0];
+    });
+    setSelectedVariants(defaultVariants);
+  }, [product]);
 
   useEffect(() => {
     if (!id) return
@@ -96,8 +124,22 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return
-    const img = product.images.find(i => i.isPrimary) ?? product.images[0]
-    addItem({ productId: product.id, title: product.title, price, image: img?.url ?? "", size, color, quantity: qty })
+    
+    const img =
+      product.images.find(i => i.variantColor === selectedColor) ||
+      product.images.find(i => i.isPrimary) ||
+      product.images[0]
+
+    addItem({
+      productId: product.id,
+      title: product.title,
+      price,
+      image: img?.url ?? "",
+      size,
+      color: selectedColor,
+      quantity: qty
+    })
+
     setAdded(true)
     showToast("🛒 Сагсанд нэмэгдлээ")
     setTimeout(() => setAdded(false), 2000)
@@ -169,10 +211,16 @@ export default function ProductDetailPage() {
 
         {/* Images */}
         <div className="space-y-3">
-          <div className="relative aspect-square rounded-3xl overflow-hidden glass">
+          <div className="relative aspect-square rounded-3xl overflow-hidden glass" 
+          onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+          onTouchEnd={(e) => {
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            if (deltaX > 50 && activeImg > 0) setActiveImg(activeImg - 1);
+            if (deltaX < -50 && activeImg < sorted.length - 1) setActiveImg(activeImg + 1);
+          }}>
             {sorted[activeImg] ? (
               <Image
-                src={sorted[activeImg].url}
+                src={mainImage || product.images[0]?.url}
                 alt={product.title}
                 fill
                 className="object-cover"
@@ -193,9 +241,16 @@ export default function ProductDetailPage() {
           {sorted.length > 1 && (
             <div className="flex gap-2 overflow-x-auto py-1 px-1 scrollbar-hide">
               {sorted.map((img, i) => (
-                <button key={img.id} onClick={() => setActiveImg(i)}
+                <button key={img.id} 
+                  onClick={() => {
+                    setActiveImg(i)
+                    setMainImage(img.url)
+                    if (img.variantColor) {
+                      setSelectedColor(img.variantColor)
+                    }
+                  }}
                   className={`relative flex-shrink-0 w-15 h-15 rounded-xl overflow-hidden border-2 transition-all ${
-                    activeImg === i ? "border-white/90 scale-105" : "border-white/10 opacity-50 hover:opacity-100"
+                    activeImg === i ? "border-rose-500/90 scale-105" : "border-white/10 opacity-50 hover:opacity-100"
                   }`}>
                   <Image src={img.url} alt="" fill className="object-cover" />
                 </button>
@@ -255,7 +310,7 @@ export default function ProductDetailPage() {
                 {product.sizes.map(s => (
                   <button key={s} onClick={() => setSize(s)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                      size === s ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white/80"
+                      size === s ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white"
                     }`}>
                     {s}
                   </button>
@@ -264,22 +319,62 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Colors */}
-          {product.colors.length > 0 && (
-            <div className="space-y-2.5">
-              <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
-              <div className="flex gap-2 flex-wrap">
-                {product.colors.map(c => (
-                  <button key={c} onClick={() => setColor(c)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium uppercase transition-all ${
-                      color === c ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white/80"
-                    }`}>
-                    {c}
-                  </button>
-                ))}
-              </div>
+        {/* Colors */}
+        {product.colors.length > 0 && (
+          <div className="space-y-2.5">
+            <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
+            <div className="flex gap-2 flex-wrap">
+              {product.colors.map(c => (
+                <button key={c} onClick={() => {
+                    setSelectedColor(c)
+                    const idx = product.images.findIndex(i => i.variantColor === c)
+                    if (idx !== -1) {
+                      setActiveImg(idx)
+                      setMainImage(product.images[idx].url)
+                    }
+                }}
+                className={`px-4 py-2 rounded-xl text-sm font-medium uppercase transition-all ${
+                  selectedColor === c ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white"
+                }`}>
+                  {c}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+        )}
+        {/* ── Custom Variants ── */}
+        {product.variants?.length ? (
+          <div className="space-y-4">
+            {product.variants.map(variant => (
+              <div key={variant.id} className="space-y-2.5">
+                <p className="text-xs tracking-[0.2em] text-white/90 uppercase">
+                  {variant.label}
+                </p>
+
+                <div className="flex gap-2 flex-wrap">
+                  {variant.values.map(val => (
+                    <button
+                      key={val}
+                      onClick={() =>
+                        setSelectedVariants(prev => ({
+                          ...prev,
+                          [variant.label]: val
+                        }))
+                      }
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        selectedVariants[variant.label] === val
+                          ? "bg-rose-500 text-white"
+                          : "glass-sm text-white/60 underline hover:text-white"
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
         {/* Quantity */}
         <div className="flex items-center justify-between glass rounded-2xl">
         <p className="text-xs tracking-[0.25em] text-white/90 uppercase font-medium">
