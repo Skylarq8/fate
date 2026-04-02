@@ -11,6 +11,10 @@ export interface CartItem {
   image: string
   size: string
   color: string
+  variants: {
+    label: string
+    value: string
+  }[]
   quantity: number
 }
 
@@ -33,11 +37,11 @@ interface CartStore {
   setCoupon:  (coupon: CouponState | null) => void
 
   totalCount:    () => number
-  totalPrice:    () => number  // хямдралгүй нийт
-  subtotal:      () => number  // барааны хямдрал хасаад
+  totalPrice:    () => number
+  subtotal:      () => number
   shippingFee:   () => number
   couponDiscount:() => number
-  finalTotal:    () => number  // бүгдийг тооцсон эцсийн дүн
+  finalTotal:    () => number
 }
 
 export const useCartStore = create<CartStore>()(

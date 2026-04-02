@@ -383,6 +383,7 @@ export default function CheckoutPage() {
           quantity:  i.quantity,
           size:      i.size,
           color:     i.color,
+          variants: i.variants.map(v => ({ [v.label]: v.value })),
           unitPrice: i.price,
         })),
       }))
@@ -565,19 +566,26 @@ export default function CheckoutPage() {
                         : <div className="w-full h-full bg-white/5" />
                       }
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-[18px] font-medium line-clamp-1">{item.title}</p>
-                      <div className="flex gap-1 mt-0.5 items-center">
-                        {item.size  && <span className="text-white/50 text-[14px]">{item.size}</span>}
-                        {item.color && <span className="text-white/50 text-[14px] capitalize">· {item.color}</span>}
-                        <span className="text-white/50 text-[14px]">· {item.quantity}ш</span>
+                    <div className="flex flex-col">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-[18px] font-medium line-clamp-1">{item.title}</p>
+                        <div className="flex gap-1.5 mt-0.5 items-center">
+                          {item.size  && <span className="text-white/50 text-[14px]">{item.size}</span>}
+                          {item.color && <span className="text-white/50 text-[14px] uppercase">{item.color}</span>}
+                          {item.variants && item.variants.map((v, idx) => (
+                            <span key={idx} className=" text-white/50 text-[14px] uppercase">
+                              {v.value}
+                            </span>
+                          ))}
+                          <span className="text-white/50 text-[14px]">· {item.quantity}ш</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-white text-[16px] font-semibold flex-shrink-0">{fmt(item.price * item.quantity)}</span>
-                      {item.originalPrice && (
-                        <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice * item.quantity)}</p>
-                      )}
+                      <div className="flex flex-col items-start">
+                        <span className="text-white text-[16px] font-semibold flex-shrink-0">{fmt(item.price * item.quantity)}</span>
+                        {item.originalPrice && (
+                          <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice * item.quantity)}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

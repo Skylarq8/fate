@@ -126,8 +126,13 @@ const finalTotal = subtotal - couponDiscount + shipping
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-xl line-clamp-1">{item.title}</p>
                   <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                    {item.size  && <span className="text-[16px] glass-sm px-0 py-0.5 rounded-full text-white">{item.size}</span>}
-                    {item.color && <span className="text-[16px] glass-sm px-2 py-0.5 rounded-full text-white uppercase">{item.color}</span>}
+                    {item.size  && <span className="text-[14px] glass-sm pr-2 py-0.5 rounded-full text-white">{item.size}</span>}
+                    {item.color && <span className="text-[14px] glass-sm px-0 py-0.5 rounded-full text-white uppercase">{item.color}</span>}
+                    {item.variants && item.variants.map((v, idx) => (
+                      <span key={idx} className="text-[14px] glass-sm pl-2 py-0.5 rounded-full text-white uppercase">
+                        {v.value}
+                      </span>
+                    ))}
                   </div>
                   <div className="flex mt-2 flex-col justify-center pr-1">
                     <p className="text-white font-bold text-lg">{fmt(item.price)}</p>

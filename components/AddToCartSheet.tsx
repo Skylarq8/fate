@@ -14,10 +14,13 @@ interface Props {
   onClose: () => void
 }
 
+type SelectedVariants = Record<string, string>;
+
 export default function AddToCartSheet({ product, onClose }: Props) {
-  const addItem       = useCartStore(s => s.addItem)
+  const addItem = useCartStore(s => s.addItem)
   const { showToast } = useToast()
 
+  const [selectedVariants, setSelectedVariants] = useState<SelectedVariants>({});
   const [size,    setSize]    = useState(product.sizes[0]  ?? "")
   const [color,   setColor]   = useState(product.colors[0] ?? "")
   const [qty,     setQty]     = useState(1)
@@ -51,6 +54,16 @@ export default function AddToCartSheet({ product, onClose }: Props) {
     return () => { document.body.style.overflow = "" }
   }, [])
 
+  useEffect(() => {
+      if (!product) return;
+  
+      const defaultVariants: SelectedVariants = {};
+      product.variants?.forEach(v => {
+        if (v.values.length > 0) defaultVariants[v.label] = v.values[0];
+      });
+      setSelectedVariants(defaultVariants);
+    }, [product]);
+
   const handleClose = () => {
     setShow(false)
     setTimeout(onClose, 300)
@@ -69,6 +82,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
       image: imgToAdd?.url ?? "",
       size,
       color,
+      variants: Object.entries(selectedVariants).map(([label, value]) => ({ label, value })),
       quantity: qty,
     })
 
@@ -83,7 +97,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
     <div className="px-5 pt-4 pb-8 space-y-5">
       {/* Product info */}
       <div className="flex gap-4 items-start">
-        <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-white/5">
+        <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-white/5">
           {img ? (
             <Image src={img.url} alt={product.title} fill className="object-cover" />
           ) : (
@@ -92,7 +106,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-white font-semibold text-base line-clamp-2 leading-snug">{product.title}</p>
+          <p className="text-white font-semibold text-[18px] line-clamp-2 leading-snug">{product.title}</p>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-white font-bold text-lg">{fmt(price)}</span>
             {product.discountEnabled && product.finalPrice && (
@@ -135,6 +149,39 @@ export default function AddToCartSheet({ product, onClose }: Props) {
           </div>
         </div>
       )}
+      {/* ── Custom Variants ── */}
+        {product.variants?.length ? (
+          <div className="space-y-4">
+            {product.variants.map(variant => (
+              <div key={variant.id} className="space-y-2.5">
+                <p className="text-xs tracking-[0.2em] text-white/90 uppercase">
+                  {variant.label}
+                </p>
+
+                <div className="flex gap-2 flex-wrap">
+                  {variant.values.map(val => (
+                    <button
+                      key={val}
+                      onClick={() =>
+                        setSelectedVariants(prev => ({
+                          ...prev,
+                          [variant.label]: val
+                        }))
+                      }
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        selectedVariants[variant.label] === val
+                          ? "bg-rose-500 text-white"
+                          : "glass-sm text-white/60 underline hover:text-white"
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
 
       {/* Quantity */}
       <div className="flex items-center justify-between glass rounded-2xl py-3">

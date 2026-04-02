@@ -22,6 +22,8 @@ export default function ProductsPage() {
   const [sort,           setSort]           = useState("newest")
   const [showFilter,     setShowFilter]     = useState(false)
   const [sortOpen,       setSortOpen]       = useState(false)
+  const [openCategory, setOpenCategory] = useState<string | null>(null)
+  const parentCategories = categories.filter(c => !c.parentId)
 
   useEffect(() => { getCategories().then(setCategories) }, [])
   useEffect(() => {
@@ -58,21 +60,65 @@ export default function ProductsPage() {
       <div>
         <p className="text-xs lg:text-[15px] text-white uppercase mb-3">Category</p>
         <div className="space-y-1">
-          {[{ id: "all", name: "Бүгд" }, ...categories.map(c => ({ id: c.id, name: c.name }))].map(cat => (
-            <button key={cat.id}
-              onClick={() => { setActiveCategory(cat.id); setShowFilter(false) }}
-              className={`w-full text-left text-sm px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-between ${
-                activeCategory === cat.id
-                  ? "glass text-white font-medium"
-                  : "text-white/50 hover:text-white/80 hover:bg-white/5"
-              }`}>
-              {cat.name}
-              {activeCategory === cat.id && (
-                <span className="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0" />
+        {/* ALL */}
+        <button
+          onClick={() => {
+            setActiveCategory("all")
+            setShowFilter(false)
+          }}
+          className={`w-full text-left text-sm px-3.5 py-2.5 rounded-xl ${
+            activeCategory === "all"
+              ? "glass text-white"
+              : "text-white/50 hover:text-white"
+          }`}>
+          Бүгд
+        </button>
+
+        {/* PARENT CATEGORIES */}
+        {parentCategories.slice().reverse().map(parent => (
+          <div key={parent.id}>
+
+            {/* Parent */}
+            <button
+              onClick={() =>
+                setOpenCategory(prev => prev === parent.id ? null : parent.id)
+              }
+              className="w-full text-left text-sm px-3.5 py-2.5 flex justify-between items-center text-white/80 hover:text-white"
+            >
+              {parent.name}
+              {parent.children.length > 0 && (
+                openCategory === parent.id
+                  ? <ChevronUp size={14}/>
+                  : <ChevronDown size={14}/>
               )}
             </button>
-          ))}
-        </div>
+
+            {/* CHILDREN */}
+            {openCategory === parent.id && parent.children.length > 0 && (
+              <div className="ml-4 space-y-1">
+                {parent.children.map(child => (
+                  <button
+                    key={child.id}
+                    onClick={() => {
+                      setActiveCategory(child.id)
+                      setShowFilter(false)
+                    }}
+                    className={`w-full text-left text-sm px-3 py-2 rounded-lg ${
+                      activeCategory === child.id
+                        ? "text-white bg-white/10"
+                        : "text-white/50 hover:text-white"
+                    }`}
+                  >
+                    {child.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+          </div>
+        ))}
+
+      </div>
       </div>
 
       {/* Sort dropdown */}

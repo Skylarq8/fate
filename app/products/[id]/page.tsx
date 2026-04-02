@@ -137,6 +137,7 @@ export default function ProductDetailPage() {
       image: img?.url ?? "",
       size,
       color: selectedColor,
+      variants: Object.entries(selectedVariants).map(([label, value]) => ({ label, value })),
       quantity: qty
     })
 
