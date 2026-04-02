@@ -56,6 +56,7 @@ export default function ProductCard({ product }: Props) {
         image:         img?.url ?? "",
         size:          "",
         color:         "",
+        variants: [],
         quantity:      1,
       })
       showToast("🛒 Сагсанд нэмэгдлээ")
