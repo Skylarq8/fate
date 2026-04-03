@@ -388,13 +388,14 @@ export default function CheckoutPage() {
 
       if (!res.ok) throw new Error("Order failed")
       const order = await res.json()
+      const orderId = order.data.id
 
       // 2️⃣ byl.mn checkout үүсгэнэ
       const bylRes = await fetch("/api/payment/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderId:    order.id,
+          orderId,
           finalTotal,
           email,
         }),
