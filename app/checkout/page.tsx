@@ -364,33 +364,51 @@ export default function CheckoutPage() {
   const handleSubmitOrder = async () => {
     setLoading(true)
     try {
+      // 1️⃣ Эхлээд order үүсгэнэ
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName,
+          phone,
+          shippingAddress,
+          items: items.map(i => ({
+            productId: i.productId,
+            quantity:  i.quantity,
+            size:      i.size,
+            color:     i.color,
+            variants: i.variants.map(v => ({ [v.label]: v.value })),
+            unitPrice: i.price,
+          })),
+          totalAmount: finalTotal,
+          couponCode:  couponData?.code,
+        }),
+      })
+
+      if (!res.ok) throw new Error("Order failed")
+      const order = await res.json()
+
+      // 2️⃣ byl.mn checkout үүсгэнэ
       const bylRes = await fetch("/api/payment/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ finalTotal, email }),
+        body: JSON.stringify({
+          orderId:    order.id,
+          finalTotal,
+          email,
+        }),
       })
+
       const bylData = await bylRes.json()
+      if (!bylData.url) throw new Error("Checkout creation failed")
 
-      sessionStorage.setItem("pendingOrder", JSON.stringify({
-        customerName,
-        phone,
-        email,
-        shippingAddress,
-        couponCode: couponData?.code,
-        totalAmount: finalTotal,
-        items: items.map(i => ({
-          productId: i.productId,
-          quantity:  i.quantity,
-          size:      i.size,
-          color:     i.color,
-          variants: i.variants.map(v => ({ [v.label]: v.value })),
-          unitPrice: i.price,
-        })),
-      }))
-
+      // 3️⃣ byl.mn checkout page руу redirect
+      clearCart()
       window.location.href = bylData.url
+
     } catch (err) {
-      console.log("ERROR:", err)
+      console.error("Order submission error:", err)
+      showToast("⚠️ Захиалга амжилтгүй боллоо. Дахин оролдоно уу.")
     } finally {
       setLoading(false)
     }
@@ -624,4 +642,8 @@ export default function CheckoutPage() {
       </div>
     </>
   )
+}
+
+function showToast(arg0: string) {
+  throw new Error("Function not implemented.")
 }

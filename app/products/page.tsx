@@ -96,7 +96,7 @@ export default function ProductsPage() {
             {/* CHILDREN */}
             {openCategory === parent.id && parent.children.length > 0 && (
               <div className="ml-4 space-y-1">
-                {parent.children.map(child => (
+                {parent.children.slice().reverse().map(child => (
                   <button
                     key={child.id}
                     onClick={() => {
