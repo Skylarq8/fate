@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     // ✅ Backend API дуудах (order статус paid болгох)
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}/pay`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
