@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
-  const { finalTotal, email } = await req.json()
+  const { finalTotal, email, orderId } = await req.json()
 
   const res = await fetch(
     `https://byl.mn/api/v1/projects/${process.env.BYL_PROJECT_ID}/checkouts`,
@@ -15,16 +15,16 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         customer_email: email,
-        // success_url: `http://localhost:3000/checkout/success`,
-        // cancel_url:  `http://localhost:3000/checkout`,
         success_url: `${process.env.NEXT_PUBLIC_URL}/checkout/success`,
         cancel_url:  `${process.env.NEXT_PUBLIC_URL}/checkout`,
+        client_reference_id: orderId,
         items: [
           {
             price_data: {
               unit_amount: finalTotal,
               product_data: { 
                 name: "Захиалга",
+                description: `FATE - Захиалга #${orderId}`,
               },
             },
             quantity: 1,
