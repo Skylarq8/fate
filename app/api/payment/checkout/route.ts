@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
   const { finalTotal, email, customerName, orderId } = await req.json()
+  const shortOrderId = orderId.slice(-8).toUpperCase()
 
   const res = await fetch(
     `https://byl.mn/api/v1/projects/${process.env.BYL_PROJECT_ID}/checkouts`,
@@ -23,9 +24,10 @@ export async function POST(req: NextRequest) {
             price_data: {
               unit_amount: finalTotal,
               product_data: { 
-                name: `FATE - Захиалга #${orderId}, ${customerName}`,
+                name: `FATE - Захиалга #${shortOrderId}, ${customerName}`,
               },
             },
+            quantity: 1,
           },
         ],
       }),
