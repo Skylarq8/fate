@@ -371,7 +371,10 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           customerName,
           phone,
+          email,
           shippingAddress,
+          totalAmount: finalTotal,
+          couponCode:  couponData?.code,
           items: items.map(i => ({
             productId: i.productId,
             quantity:  i.quantity,
@@ -380,8 +383,6 @@ export default function CheckoutPage() {
             variants: i.variants.map(v => ({ [v.label]: v.value })),
             unitPrice: i.price,
           })),
-          totalAmount: finalTotal,
-          couponCode:  couponData?.code,
         }),
       })
 
