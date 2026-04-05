@@ -7,11 +7,11 @@ import ProductCard from "@/components/ProductCard"
 import { SlidersHorizontal, X, ChevronDown, ChevronUp } from "lucide-react"
 
 const SORT_OPTIONS = [
+  { value: "discount",   label: "Хямдралтай эхэндээ" },
   { value: "newest",     label: "Шинээс хуучин" },
   { value: "oldest",     label: "Хуучнаас шинэ" },
   { value: "price_asc",  label: "Хямдаас үнэтэй" },
   { value: "price_desc", label: "Үнэтэйгээс хямд" },
-  { value: "discount",   label: "Хямдралтай эхэндээ" },
 ]
 
 export default function ProductsPage() {
@@ -19,7 +19,7 @@ export default function ProductsPage() {
   const [categories,     setCategories]     = useState<Category[]>([])
   const [loading,        setLoading]        = useState(true)
   const [activeCategory, setActiveCategory] = useState("all")
-  const [sort,           setSort]           = useState("newest")
+  const [sort,           setSort]           = useState("discount")
   const [showFilter,     setShowFilter]     = useState(false)
   const [sortOpen,       setSortOpen]       = useState(false)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
