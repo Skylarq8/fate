@@ -96,7 +96,7 @@ export default function ProductsPage() {
             {/* CHILDREN */}
             {openCategory === parent.id && parent.children.length > 0 && (
               <div className="ml-5 space-y-1">
-                {parent.children.slice().reverse().map(child => (
+                {parent.children.map(child => (
                   <button
                     key={child.id}
                     onClick={() => {
@@ -229,7 +229,7 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-white/30 space-y-3">
+            <div className="flex flex-col items-center justify-center py-24 text-white/40 space-y-3">
               <p className="text-5xl">✦</p>
               <p className="font-display text-lg">Бараа олдсонгүй</p>
             </div>
