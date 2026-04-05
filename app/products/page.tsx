@@ -95,7 +95,7 @@ export default function ProductsPage() {
 
             {/* CHILDREN */}
             {openCategory === parent.id && parent.children.length > 0 && (
-              <div className="ml-4 space-y-1">
+              <div className="ml-5 space-y-1">
                 {parent.children.slice().reverse().map(child => (
                   <button
                     key={child.id}
@@ -105,11 +105,15 @@ export default function ProductsPage() {
                     }}
                     className={`w-full text-left text-sm px-3 py-2 rounded-lg ${
                       activeCategory === child.id
-                        ? "text-white bg-white/10"
-                        : "text-white/50 hover:text-white"
-                    }`}
-                  >
-                    {child.name}
+                        ? "text-white font-medium bg-white/10"
+                      : "text-white/50 hover:text-white hover:bg-white/5"
+                    }`}>
+                    <div className="flex flex-row items-center justify-between">
+                      {child.name}
+                      {activeCategory === child.id && (
+                        <span className="w-2 h-2 rounded-full bg-rose-500 ml-2" />
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -140,9 +144,9 @@ export default function ProductsPage() {
               {SORT_OPTIONS.map(opt => (
                 <button key={opt.value}
                   onClick={() => { setSort(opt.value); setSortOpen(false); setShowFilter(false) }}
-                  className={`w-full text-left text-sm px-3.5 py-2.5 transition-all rounded-xl flex items-center justify-between ${
+                  className={`w-full text-left text-sm px-3.5 py-2.5 my-1 transition-all rounded-xl flex items-center justify-between ${
                     sort === opt.value
-                      ? "text-white font-medium bg-white/5"
+                      ? "text-white font-medium bg-white/10"
                       : "text-white/50 hover:text-white hover:bg-white/5"
                   }`}>
                   {opt.label}
@@ -174,7 +178,7 @@ export default function ProductsPage() {
         {/* Mobile filter button */}
         <button onClick={() => setShowFilter(true)}
           className="md:hidden glass-sm flex items-center gap-2 text-sm text-white/90 px-4 py-2.5 rounded-xl hover:text-white transition-colors">
-          <SlidersHorizontal size={15} /> Шүүлт
+          <SlidersHorizontal size={15} /> Filter
         </button>
       </div>
 
@@ -200,7 +204,7 @@ export default function ProductsPage() {
               style={{ zIndex: 9999 }}
             >
               <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
-                <p className="font-display font-semibold text-white text-lg">Шүүлт</p>
+                <p className="font-display font-semibold text-white text-lg">Filter</p>
                 <button onClick={() => setShowFilter(false)} className="text-white/90 hover:text-white transition-colors">
                   <X size={20} />
                 </button>
@@ -230,7 +234,7 @@ export default function ProductsPage() {
               <p className="font-display text-lg">Бараа олдсонгүй</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {filtered.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
