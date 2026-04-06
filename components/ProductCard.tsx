@@ -68,7 +68,7 @@ export default function ProductCard({ product }: Props) {
       <Link href={`/products/${product.id}`} className="group block">
         <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition hover:shadow-lg hover:bg-white/20">
           {/* image */}
-          <div className="relative aspect-square overflow-hidden rounded-t-xl">
+          <div className="relative aspect-square overflow-hidden rounded-t-2xl">
             {img ? (
               <Image
                 src={img.url}
