@@ -66,7 +66,8 @@ export default function ProductCard({ product }: Props) {
   return (
     <>
       <Link href={`/products/${product.id}`} className="group block">
-        <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition hover:shadow-lg hover:bg-white/20">
+      {/* bg-white/10 backdrop-blur-md */}
+        <div className="rounded-2xl border border-white/20 transition hover:shadow-lg hover:bg-white/20">
           {/* image */}
           <div className="relative aspect-square overflow-hidden rounded-t-2xl">
             {img ? (
@@ -88,7 +89,8 @@ export default function ProductCard({ product }: Props) {
               </span>
             )}
           </div>
-          <div className="px-3 pb-3 pt-1.5">
+          {/* bg-white/10 backdrop-blur-md rounded-b-2xl */}
+          <div className="px-3 pb-3 pt-1.5 bg-white/10 backdrop-blur-md rounded-b-2xl">
             <div className="space-y-1">
               <h1 className="text-[16px] font-medium text-white/90 line-clamp-1">{product.title}</h1>
               <div className="flex items-center gap-2">
