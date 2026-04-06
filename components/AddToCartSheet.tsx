@@ -97,7 +97,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
     <div className="px-5 pt-4 pb-8 space-y-5">
       {/* Product info */}
       <div className="flex gap-4 items-start">
-        <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-white/5">
+        <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-2xl overflow-hidden flex-shrink-0 bg-white/5">
           {img ? (
             <Image src={img.url} alt={product.title} fill className="object-cover" />
           ) : (
@@ -106,11 +106,11 @@ export default function AddToCartSheet({ product, onClose }: Props) {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-white font-semibold text-[18px] line-clamp-2 leading-snug">{product.title}</p>
+          <p className="text-white font-semibold text-[18px] lg:text-[20px] line-clamp-2 leading-snug">{product.title}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-white font-bold text-lg">{fmt(price)}</span>
+            <span className="text-white font-bold text-lg lg:text-[20px]">{fmt(price)}</span>
             {product.discountEnabled && product.finalPrice && (
-              <span className="text-white/35 line-through text-sm">{fmt(product.price)}</span>
+              <span className="text-white/35 line-through text-sm lg:text-[16px]">{fmt(product.price)}</span>
             )}
           </div>
         </div>
@@ -119,11 +119,11 @@ export default function AddToCartSheet({ product, onClose }: Props) {
       {/* Sizes */}
       {product.sizes.length > 0 && (
         <div className="space-y-2.5">
-          <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Хэмжээ</p>
+          <p className="text-xs lg:text-[13px] tracking-[0.2em] text-white/90 uppercase">Хэмжээ</p>
           <div className="flex gap-2 flex-wrap">
             {product.sizes.map(s => (
               <button key={s} onClick={() => setSize(s)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm lg:text-[15px] font-medium transition-all ${
                   size === s ? "bg-rose-500 text-white/90" : "glass-sm text-white/60 underline hover:text-white"
                 }`}>
                 {s}
@@ -136,11 +136,11 @@ export default function AddToCartSheet({ product, onClose }: Props) {
       {/* Colors */}
       {product.colors.length > 0 && (
         <div className="space-y-2.5">
-          <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
+          <p className="text-xs lg:text-[13px] tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
           <div className="flex gap-2 flex-wrap">
             {product.colors.map(c => (
               <button key={c} onClick={() => setColor(c)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm lg:text-[15px] font-medium capitalize transition-all ${
                   color === c ? "bg-rose-500 text-white/90" : "glass-sm text-white/60 underline hover:text-white"
                 }`}>
                 {c}
@@ -154,7 +154,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
           <div className="space-y-4">
             {product.variants.map(variant => (
               <div key={variant.id} className="space-y-2.5">
-                <p className="text-xs tracking-[0.2em] text-white/90 uppercase">
+                <p className="text-xs lg:text-[13px] tracking-[0.2em] text-white/90 uppercase">
                   {variant.label}
                 </p>
 
@@ -168,7 +168,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
                           [variant.label]: val
                         }))
                       }
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      className={`px-4 py-2 rounded-xl text-sm lg:text-[15px] font-medium transition-all ${
                         selectedVariants[variant.label] === val
                           ? "bg-rose-500 text-white"
                           : "glass-sm text-white/60 underline hover:text-white"
@@ -185,13 +185,13 @@ export default function AddToCartSheet({ product, onClose }: Props) {
 
       {/* Quantity */}
       <div className="flex items-center justify-between glass rounded-2xl py-3">
-        <p className="text-xs tracking-[0.2em] text-white/90 uppercase font-medium">Тоо ширхэг</p>
+        <p className="text-xs lg:text-[13px] tracking-[0.2em] text-white/90 uppercase font-medium">Тоо ширхэг</p>
         <div className="flex items-center rounded-xl overflow-hidden border border-white/10 bg-white/10">
           <button onClick={() => setQty(q => Math.max(1, q - 1))}
             className="px-2.5 py-1.5 text-white/60 hover:text-white transition-colors">
             <Minus size={14} />
           </button>
-          <span className="px-2.5 py-1.5 text-sm font-bold text-white min-w-[2.5rem] text-center border-x border-white/10">
+          <span className="px-2.5 py-1.5 text-sm lg:text-[15px] font-bold text-white min-w-[2.5rem] text-center border-x border-white/10">
             {qty}
           </span>
           <button onClick={() => setQty(q => q + 1)}
@@ -203,7 +203,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
 
       {/* Add button */}
       <button onClick={handleAdd}
-        className="w-full py-4 bg-rose-500 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-98">
+        className="w-full py-4 bg-rose-500 rounded-2xl font-semibold text-sm lg:text-[15px] flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-98">
         {added ? <Check size={18} /> : <ShoppingCart size={18} />}
         {added ? "Нэмэгдлээ!" : "Сагсанд нэмэх"}
       </button>
@@ -235,9 +235,9 @@ export default function AddToCartSheet({ product, onClose }: Props) {
           >
             {/* header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-1">
-              <p className="font-display font-semibold text-white text-[20px]">Сагсанд нэмэх</p>
+              <p className="font-display font-semibold text-white text-[20px] lg:text-[22px]">Сагсанд нэмэх</p>
               <button onClick={handleClose} className="text-white/40 hover:text-white transition-colors">
-                <X size={18} />
+                <X size={18}  className="lg:size-5"/>
               </button>
             </div>
             {content}

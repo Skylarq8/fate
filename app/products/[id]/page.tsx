@@ -291,13 +291,15 @@ export default function ProductDetailPage() {
           )}
 
           <div className="space-y-2.5">
-            <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Барааны дэлгэрэнгүй</p>
-            <p className="text-white leading-relaxed text-[16px] lg:text-[18px]">{product.description}</p>
+            <p className="text-xs lg:text-[14px] tracking-[0.2em] text-white/90 uppercase">Барааны дэлгэрэнгүй</p>
+            <p className="text-white leading-relaxed text-[15px] lg:text-[17px] whitespace-pre-line">
+              {product.description}
+            </p>
           </div>
           {/* Categories */}
           {/* <div className="flex gap-2 flex-wrap">
             {product.categories.map(({ category }) => (
-              <span key={category.id} className="text-xs glass-sm px-3 py-1 rounded-full text-white/60 font-medium">
+              <span key={category.id} className="text-xs lg:text-[14px] glass-sm px-3 py-1 rounded-full text-white/60 font-medium">
                 {category.name}
               </span>
             ))}
@@ -306,11 +308,11 @@ export default function ProductDetailPage() {
           {/* Sizes */}
           {product.sizes.length > 0 && (
             <div className="space-y-2.5">
-              <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Хэмжээ</p>
+              <p className="text-xs lg:text-[14px] tracking-[0.2em] text-white/90 uppercase">Хэмжээ</p>
               <div className="flex gap-2 flex-wrap">
                 {product.sizes.map(s => (
                   <button key={s} onClick={() => setSize(s)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    className={`px-4 py-2 rounded-xl text-sm lg:text-[15px] font-medium transition-all ${
                       size === s ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white"
                     }`}>
                     {s}
@@ -323,7 +325,7 @@ export default function ProductDetailPage() {
         {/* Colors */}
         {product.colors.length > 0 && (
           <div className="space-y-2.5">
-            <p className="text-xs tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
+            <p className="text-xs lg:text-[14px] tracking-[0.2em] text-white/90 uppercase">Өнгө</p>
             <div className="flex gap-2 flex-wrap">
               {product.colors.map(c => (
                 <button key={c} onClick={() => {
@@ -334,7 +336,7 @@ export default function ProductDetailPage() {
                       setMainImage(product.images[idx].url)
                     }
                 }}
-                className={`px-4 py-2 rounded-xl text-sm font-medium uppercase transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm lg:text-[15px] font-medium uppercase transition-all ${
                   selectedColor === c ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white"
                 }`}>
                   {c}
@@ -378,7 +380,7 @@ export default function ProductDetailPage() {
         ) : null}
         {/* Quantity */}
         <div className="flex items-center justify-between glass rounded-2xl">
-        <p className="text-xs tracking-[0.25em] text-white/90 uppercase font-medium">
+        <p className="text-xs lg:text-[14px] tracking-[0.25em] text-white/90 uppercase font-medium">
             Тоо ширхэг
         </p>
             <div className="flex items-center rounded-xl overflow-hidden border border-white/10 bg-white/10 backdrop-blur-md">
@@ -387,7 +389,7 @@ export default function ProductDetailPage() {
                 className="px-2.5 py-1.5 text-white/60 hover:text-white transition-all">
                 <Minus size={16} />
                 </button>
-                <span className="px-2.5 py-1.5 text-sm font-semibold text-white min-w-[40px] text-center border-x border-white/10">
+                <span className="px-2.5 py-1.5 text-sm lg:text-[15px] font-semibold text-white min-w-[40px] text-center border-x border-white/10">
                 {qty}
                 </span>
                 <button
