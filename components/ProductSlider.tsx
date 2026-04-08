@@ -100,16 +100,17 @@ export default function ProductCarousel({ title, filter = "all" }: Props) {
       {/* Mobile → Swiper */}
       {!loading && screenSize !== "desktop" && (
         <Swiper
-          slidesPerGroup={screenSize === "mobile" ? 2 : 3}
           modules={[FreeMode]}
           ref={swiperRef}
           slidesPerView={
             screenSize === "mobile" ? 2 :
             screenSize === "tablet" ? 3 :
-            4 // desktop бол grid ашиглана
+            4
           }
+          slidesPerGroup={screenSize === "mobile" ? 2 : 3}
           freeMode={true}
           spaceBetween={7}
+          speed={650}
           // breakpoints={{
           //   300: { slidesPerView: 2 },
           //   640: { slidesPerView: 3 },
