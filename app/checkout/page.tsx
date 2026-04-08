@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPin, ShoppingBag, CheckCircle, X, Home, Building2, Briefcase } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPin, ShoppingBag, CheckCircle, X, Home, Building2, Briefcase, ShoppingCart } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 import { fmt } from "@/lib/api"
 import { CITIES, getDistricts, getKhoroos } from "@/lib/data/location"
@@ -418,11 +418,17 @@ export default function CheckoutPage() {
   }
 
   if (items.length === 0) return (
-    <div className="max-w-lg min-h-[80vh] flex flex-col justify-center items-center mx-auto px-5 text-center space-y-5">
-      <ShoppingBag size={48} className="text-white/20" />
-      <p className="font-display text-xl text-white/50">Сагс хоосон байна</p>
-      <Link href="/products" className="text-sm text-white/40 hover:text-white transition-colors flex items-center gap-1">
-        <ChevronLeft size={14} /> Дэлгүүр рүү буцах
+    <div className="max-w-lg min-h-[80vh] flex justify-center items-center flex-col mx-auto px-5 py-28 text-center space-y-6 fade-up">
+      <div className="w-24 h-24 glass rounded-3xl flex items-center justify-center mx-auto">
+        <ShoppingCart className="w-12 h-12 text-white/90" />
+      </div>
+      <div>
+        <h2 className="font-display text-2xl font-bold text-white/90">Сагс хоосон байна</h2>
+        <p className="text-white/40 text-sm">Бараа нэмэхийн тулд дэлгүүр хэсье</p>
+      </div>
+      <Link href="/products"
+        className="inline-flex items-center gap-2 font-semibold px-7 py-2.5 rounded-full bg-rose-500 text-white/90 text-sm">
+        🛒 Дэлгүүр хэсэх
       </Link>
     </div>
   )
