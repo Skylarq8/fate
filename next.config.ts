@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
-import withPWAInit from "next-pwa";
 
-const withPWA = withPWAInit({
+const withPWA = require("next-pwa")({
   dest: "public",
   register: true,
   skipWaiting: true,
@@ -17,5 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// 👇 TYPE алдааг force дарна
-export default withPWA(nextConfig as any);
+module.exports = withPWA(nextConfig);
