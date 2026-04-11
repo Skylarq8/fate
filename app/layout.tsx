@@ -29,6 +29,9 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "FATE",
+  icons: {
+    icon: "/public/icon.png",
+  },
   description: "FATE",
   manifest: "/manifest.json",
   themeColor: "#000000",
