@@ -38,11 +38,11 @@ export default function ProductCarousel({ title, filter = "all" }: Props) {
     getProducts().then(data => {
       let result = data
       if (filter === "featured") result = data.filter(p => p.discountEnabled)
-      // if (filter === "newest")   result = [...data].sort((a, b) =>
-      //   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      // )
-      if (filter === "newest") result = data.filter(p => !p.discountEnabled).sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      if (filter === "newest")   result = [...data].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      // if (filter === "newest") result = data.filter(p => !p.discountEnabled).sort((a, b) => 
+      //   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
       if (filter === "all") result = data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice().reverse()
       setProducts(result)
