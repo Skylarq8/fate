@@ -12,7 +12,7 @@ export default function Footer() {
         <h3 className="font-bold text-lg mb-2">Холбоо барих</h3>
         <a href="tel:90304878" className="flex items-center justify-center space-x-2">
             <Phone size={18} />
-            <span>+976 90304878</span>
+            <span>+976 99274080</span>
         </a>
         {/* <a href="tel:55152711" className="flex items-center justify-center space-x-2">
             <Phone size={18} />
