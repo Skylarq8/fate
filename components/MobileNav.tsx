@@ -57,7 +57,7 @@ export default function MobileNav() {
       className={`fixed bottom-0 left-0 right-0 z-50 bg-background border-t transition-transform duration-300 lg:hidden
       ${show ? "translate-y-0" : "translate-y-full"}`}
     >
-      <div className="flex justify-around items-center h-15">
+      <div className="flex justify-around items-center h-16">
         <Link href="/" className="flex flex-col items-center text-xs">
           <Home size={20} />
           Нүүр
