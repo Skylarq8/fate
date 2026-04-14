@@ -20,7 +20,7 @@ export interface CartItem {
 
 export interface CouponState {
   code: string
-  type: "percent" | "amount"
+  type: "percentage" | "amount"
   discountPercent?: number
   discountAmount?: number
 }
@@ -100,7 +100,7 @@ export const useCartStore = create<CartStore>()(
         const coupon   = get().coupon
         const subtotal = get().subtotal()
         if (!coupon) return 0
-        if (coupon.type === "percent" && coupon.discountPercent) {
+        if (coupon.type === "percentage" && coupon.discountPercent) {
           return Math.round(subtotal * (coupon.discountPercent / 100))
         }
         if (coupon.type === "amount" && coupon.discountAmount) {

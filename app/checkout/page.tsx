@@ -331,7 +331,7 @@ export default function CheckoutPage() {
   const couponData = typeof window !== "undefined"
     ? JSON.parse(sessionStorage.getItem("coupon") || "null")
     : null
-  const couponDiscount = coupon?.discountAmount ?? 0
+
   const [loading, setLoading] = useState(false)
   const [addressSheetOpen, setAddressSheetOpen] = useState(false)
 
@@ -345,6 +345,19 @@ export default function CheckoutPage() {
   const baseTotal       = items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0)
   const productDiscount = items.reduce((s, i) => i.originalPrice ? s + (i.originalPrice - i.price) * i.quantity : s, 0)
   const subtotal        = baseTotal - productDiscount
+
+  const couponDiscount = (() => {
+    if (!couponData && !coupon) return 0
+    const c = couponData || coupon
+    if (c.type === "percent" && c.discountPercent) {
+      return Math.round(subtotal * (c.discountPercent / 100))
+    }
+    if (c.type === "amount" && c.discountAmount) {
+      return Math.min(c.discountAmount, subtotal)
+    }
+    return 0
+  })()
+
   const finalTotal      = subtotal + shipping - couponDiscount
 
   const validate = () => {
@@ -628,7 +641,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-[14px]">
                     <span className="text-white/80">Купон хямдрал
                       {couponData?.discountPercent && (
-                        <span className="ml-1 text-violet-400">{couponData.discountPercent}%</span>
+                        <span className="ml-1 text-rose-500">{couponData.discountPercent}%</span>
                       )}
                     </span>
                     <span className="text-green-400">-{fmt(couponDiscount)}</span>
