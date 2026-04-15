@@ -12,11 +12,11 @@ import Link from "next/link"
 
 interface Props {
   title: string
-  filter?: "featured" | "newest" | "all"
+  // filter?: "featured" | "newest" | "all"
+  products: Product[]
 }
 
-export default function ProductCarousel({ title, filter = "all" }: Props) {
-  const [products,   setProducts]   = useState<Product[]>([])
+export default function ProductCarousel({ title, products }: Props) {
   const [loading,    setLoading]    = useState(true)
   const [screenSize, setScreenSize] = useState<"mobile" | "tablet" | "desktop">("mobile");
   const swiperRef = useRef<any>(null)
@@ -28,27 +28,11 @@ export default function ProductCarousel({ title, filter = "all" }: Props) {
       else if (width >= 768) setScreenSize("tablet")
       else setScreenSize("mobile")
     }
-
+    if (products.length > 0) setLoading(false)
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
-
-  useEffect(() => {
-    getProducts().then(data => {
-      let result = data
-      if (filter === "featured") result = data.filter(p => p.discountEnabled)
-      if (filter === "newest")   result = [...data].sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      // if (filter === "newest") result = data.filter(p => !p.discountEnabled).sort((a, b) => 
-      //   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-      if (filter === "all") result = data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice().reverse()
-      setProducts(result)
-      setLoading(false)
-    })
-  }, [filter])
 
   return (
     <div className="mt-3 md:mt-7 lg:mt-9">
