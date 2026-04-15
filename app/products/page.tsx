@@ -1,10 +1,10 @@
-// 📁 app/products/page.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, useRef } from "react"
 import { getProducts, getCategories, Product, Category } from "@/lib/api"
 import ProductCard from "@/components/ProductCard"
-import { SlidersHorizontal, X, ChevronDown, ChevronUp } from "lucide-react"
+import CategoryItem, { CategoryWithCount } from "@/components/CategoryItem"
+import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from "lucide-react"
 
 const SORT_OPTIONS = [
   { value: "discount",   label: "Хямдралтай эхэндээ" },
@@ -14,26 +14,91 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Үнэтэйгээс хямд" },
 ]
 
+/**
+ * Recursively calculate total product count for a category,
+ * including all nested children. Matches admin dashboard logic.
+ */
+function computeProductCount(cat: Category): number {
+  const direct = cat._count?.products ?? 0
+  const childSum = (cat.children ?? []).reduce(
+    (acc, child) => acc + computeProductCount(child),
+    0
+  )
+  return direct + childSum
+}
+
+/**
+ * Map raw API Category to CategoryWithCount (adds productCount recursively).
+ */
+function enrichCategory(cat: Category): CategoryWithCount {
+  return {
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    parentId: cat.parentId ?? null,
+    productCount: computeProductCount(cat),
+    children: (cat.children ?? []).map(enrichCategory),
+  }
+}
+
 export default function ProductsPage() {
   const [products,       setProducts]       = useState<Product[]>([])
-  const [categories,     setCategories]     = useState<Category[]>([])
+  const [categories,     setCategories]     = useState<CategoryWithCount[]>([])
   const [loading,        setLoading]        = useState(true)
   const [activeCategory, setActiveCategory] = useState("all")
   const [sort,           setSort]           = useState("discount")
   const [showFilter,     setShowFilter]     = useState(false)
   const [sortOpen,       setSortOpen]       = useState(false)
-  const [openCategory, setOpenCategory] = useState<string | null>(null)
-  const parentCategories = categories.filter(c => !c.parentId)
+  const [openCategories, setOpenCategories] = useState<string[]>([])
+  // Search state for the category panel
+  const [categorySearch, setCategorySearch] = useState("")
+  const searchRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { getCategories().then(setCategories) }, [])
+  const parentCategories = useMemo(
+    () => categories.filter(c => !c.parentId),
+    [categories]
+  )
+
+  // Fetch categories and enrich with recursive product counts
+  useEffect(() => {
+    getCategories().then(raw => {
+      setCategories(raw.map(enrichCategory))
+    })
+  }, [])
+
   useEffect(() => {
     setLoading(true)
     getProducts().then(d => { setProducts(d); setLoading(false) })
   }, [])
 
-  const filtered = products
-    .filter(p => activeCategory === "all"
-      ? true : p.categories.some(c => c.category.id === activeCategory))
+  const toggleCategory = (id: string) => {
+    setOpenCategories(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  }
+
+  /**
+   * Filter categories by search query (name match, case-insensitive).
+   * When searching, flatten parents that have matching children too.
+   */
+  const filteredParentCategories = useMemo(() => {
+    if (!categorySearch.trim()) return parentCategories.slice().reverse()
+    const q = categorySearch.toLowerCase()
+    return parentCategories
+      .slice()
+      .reverse()
+      .filter(cat =>
+        cat.name.toLowerCase().includes(q) ||
+        cat.children.some(child => child.name.toLowerCase().includes(q))
+      )
+  }, [parentCategories, categorySearch])
+
+  const filtered = useMemo(() => products
+    .filter(p =>
+      activeCategory === "all"
+        ? true
+        : p.categories.some(c => c.category.id === activeCategory)
+    )
     .sort((a, b) => {
       const pa = a.discountEnabled && a.finalPrice ? a.finalPrice : a.price
       const pb = b.discountEnabled && b.finalPrice ? b.finalPrice : b.price
@@ -47,111 +112,128 @@ export default function ProductsPage() {
         return db - da
       }
       return 0
-    })
+    }), [products, activeCategory, sort])
 
   const activeCategoryName = activeCategory === "all"
-    ? null : categories.find(c => c.id === activeCategory)?.name
+    ? null
+    : categories.find(c => c.id === activeCategory)?.name
 
   const currentSort = SORT_OPTIONS.find(o => o.value === sort)?.label ?? "Эрэмбэлэх"
 
+  // Total product count for "All" badge
+  const totalCount = useMemo(
+    () => parentCategories.reduce((acc, c) => acc + c.productCount, 0),
+    [parentCategories]
+  )
+
   const FilterContent = () => (
-    <div className="space-y-7">
-      {/* Categories */}
+    <div className="space-y-6">
+
+      {/* ── Categories ── */}
       <div>
-        <p className="text-xs lg:text-[15px] text-white uppercase mb-3">Category</p>
-        <div className="space-y-1">
-        {/* ALL */}
-        <button
-          onClick={() => {
-            setActiveCategory("all")
-            setShowFilter(false)
-          }}
-          className={`w-full text-left text-sm px-3.5 py-2.5 rounded-xl ${
-            activeCategory === "all"
-              ? "glass text-white"
-              : "text-white/50 hover:text-white"
-          }`}>
-          Бүгд
-        </button>
+        <p className="text-[11px] font-semibold tracking-widest text-white/90 uppercase mb-3 px-1">
+          Category
+        </p>
 
-        {/* PARENT CATEGORIES */}
-        {parentCategories.slice().reverse().map(parent => (
-          <div key={parent.id}>
+        {/* Scrollable category list — max height prevents overwhelming scroll */}
+        <div className="h-auto overflow-y-auto overscroll-contain
+          scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10
+          space-y-0.5 pr-0.5">
 
-            {/* Parent */}
+          {/* ALL button */}
+          {!categorySearch && (
             <button
-              onClick={() =>
-                setOpenCategory(prev => prev === parent.id ? null : parent.id)
-              }
-              className="w-full text-left text-sm px-3.5 py-2.5 flex justify-between items-center text-white/80 hover:text-white"
+              onClick={() => { setActiveCategory("all"); setShowFilter(false) }}
+              className={`
+                group w-full text-left text-sm px-3 py-2 rounded-xl
+                flex items-center justify-between gap-2
+                transition-all duration-200
+                ${activeCategory === "all"
+                  ? "bg-rose-500/15 text-rose-400 font-medium"
+                  : "text-white/55 hover:text-white hover:bg-white/5"
+                }
+              `}
             >
-              {parent.name}
-              {parent.children.length > 0 && (
-                openCategory === parent.id
-                  ? <ChevronUp size={14}/>
-                  : <ChevronDown size={14}/>
+              <span className="flex items-center gap-2">
+                <span className={`
+                  flex-shrink-0 w-1.5 h-1.5 rounded-full transition-all
+                  ${activeCategory === "all" ? "bg-rose-500" : "bg-white/0 group-hover:bg-white/20"}
+                `} />
+                Бүгд
+              </span>
+              {totalCount > 0 && (
+                <span className={`text-[11px] px-1.5 py-0.5 rounded-md tabular-nums font-medium
+                  ${activeCategory === "all"
+                    ? "bg-rose-500/20 text-rose-400"
+                    : "bg-white/8 text-white/35 group-hover:text-white/50"
+                  }`}>
+                  {totalCount}
+                </span>
               )}
             </button>
+          )}
 
-            {/* CHILDREN */}
-            {openCategory === parent.id && parent.children.length > 0 && (
-              <div className="ml-5 space-y-1">
-                {parent.children.map(child => (
-                  <button
-                    key={child.id}
-                    onClick={() => {
-                      setActiveCategory(child.id)
-                      setShowFilter(false)
-                    }}
-                    className={`w-full text-left text-sm px-3 py-2 rounded-lg ${
-                      activeCategory === child.id
-                        ? "text-white font-medium bg-white/10"
-                      : "text-white/50 hover:text-white hover:bg-white/5"
-                    }`}>
-                    <div className="flex flex-row items-center justify-between">
-                      {child.name}
-                      {activeCategory === child.id && (
-                        <span className="w-2 h-2 rounded-full bg-rose-500 ml-2" />
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Parent categories */}
+          {filteredParentCategories.map(parent => (
+            <CategoryItem
+              key={parent.id}
+              category={parent}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+              openCategories={openCategories}
+              toggleCategory={toggleCategory}
+              setShowFilter={setShowFilter}
+            />
+          ))}
 
-          </div>
-        ))}
-
-      </div>
+          {/* Empty search state */}
+          {categorySearch && filteredParentCategories.length === 0 && (
+            <p className="text-center text-white/25 text-xs py-4">Олдсонгүй</p>
+          )}
+        </div>
       </div>
 
-      {/* Sort dropdown */}
+      {/* Divider */}
+      <div className="h-px bg-white/8" />
+
+      {/* ── Sort ── */}
       <div>
-        <p className="text-xs lg:text-[15px] text-white uppercase mb-3">Эрэмбэлэх</p>
+        <p className="text-[11px] font-semibold tracking-widest text-white/90 uppercase mb-3 px-1">
+          Эрэмбэлэх
+        </p>
         <div className="relative">
           <button
             onClick={() => setSortOpen(v => !v)}
-            className="w-full glass-sm text-left text-sm px-3.5 py-2.5 rounded-xl text-white flex items-center justify-between hover:bg-white/5 transition-colors"
+            className="w-full text-left text-sm px-3 py-2.5 rounded-xl text-white
+              flex items-center justify-between gap-2
+              bg-black/5 border border-white/10 hover:border-white/20 hover:bg-white/8
+              transition-all duration-150"
           >
-            <span>{currentSort}</span>
+            <span className="text-white/80">{currentSort}</span>
             {sortOpen
-              ? <ChevronUp size={15} className="text-white/70 flex-shrink-0" />
-              : <ChevronDown size={15} className="text-white/70 flex-shrink-0" />
+              ? <ChevronUp size={13} className="text-white/40 flex-shrink-0" />
+              : <ChevronDown size={13} className="text-white/40 flex-shrink-0" />
             }
           </button>
+
           {sortOpen && (
-            <div className="mt-1 glass rounded-xl overflow-hidden">
+            <div className="mt-1.5 bg-black/50 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl">
               {SORT_OPTIONS.map(opt => (
-                <button key={opt.value}
+                <button
+                  key={opt.value}
                   onClick={() => { setSort(opt.value); setSortOpen(false); setShowFilter(false) }}
-                  className={`w-full text-left text-sm px-3.5 py-2.5 my-1 transition-all rounded-xl flex items-center justify-between ${
-                    sort === opt.value
-                      ? "text-white font-medium bg-white/10"
+                  className={`
+                    w-full text-left text-sm px-3.5 py-2.5 rounded-xl transition-all
+                    flex items-center justify-between gap-2
+                    ${sort === opt.value
+                      ? "text-rose-400 bg-rose-500/10 font-medium"
                       : "text-white/50 hover:text-white hover:bg-white/5"
-                  }`}>
+                    }
+                  `}
+                >
                   {opt.label}
                   {sort === opt.value && (
-                    <span className="w-2 h-2 rounded-full bg-rose-500 flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0" />
                   )}
                 </button>
               ))}
@@ -163,29 +245,41 @@ export default function ProductsPage() {
   )
 
   return (
-    <div className="max-w-6xl mx-auto py-3">
+    <div className="max-w-7xl mx-auto py-3">
 
       {/* ── Header ── */}
       <div className="flex items-end justify-between mb-6">
         <div>
           <h1 className="font-display text-3xl font-bold text-white">Бараанууд</h1>
           {activeCategoryName ? (
-            <p className="text-white/90 text-sm mt-1">{activeCategoryName} · {filtered.length} бараа</p>
+            <p className="text-white/60 text-sm mt-1">
+              <span className="text-rose-400">{activeCategoryName}</span>
+              <span className="text-white/30 mx-1.5">·</span>
+              {filtered.length} бараа
+            </p>
           ) : (
-            <p className="text-white/90 text-sm mt-1">{filtered.length} бараа</p>
+            <p className="text-white/50 text-sm mt-1">{filtered.length} бараа</p>
           )}
         </div>
+
         {/* Mobile filter button */}
-        <button onClick={() => setShowFilter(true)}
-          className="md:hidden glass-sm flex items-center gap-2 text-sm text-white/90 px-4 py-2.5 rounded-xl hover:text-white transition-colors">
-          <SlidersHorizontal size={15} /> Filter
+        <button
+          onClick={() => setShowFilter(true)}
+          className="md:hidden flex items-center gap-2 text-sm text-white/80 px-4 py-2 rounded-xl
+            bg-white/8 border border-white/10 hover:text-white hover:bg-white/12 transition-all"
+        >
+          <SlidersHorizontal size={14} />
+          Filter
+          {activeCategory !== "all" && (
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+          )}
         </button>
       </div>
 
       <div className="flex gap-6">
 
         {/* ── Desktop left sidebar ── */}
-        <aside className="hidden md:block w-64 flex-shrink-0">
+        <aside className="hidden md:block w-72 flex-shrink-0">
           <div className="glass rounded-2xl p-4 sticky top-24">
             <FilterContent />
           </div>
@@ -195,28 +289,46 @@ export default function ProductsPage() {
         {showFilter && (
           <>
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm md:hidden"
               style={{ zIndex: 9998 }}
               onClick={() => setShowFilter(false)}
             />
             <div
-              className="fixed top-0 right-0 h-full w-72 flex flex-col bg-black/50 backdrop-blur-xl md:hidden"
+              className="fixed top-0 right-0 h-full w-72 flex flex-col
+                bg-[#0a0a0a]/90 backdrop-blur-xl border-l border-white/10 md:hidden"
               style={{ zIndex: 9999 }}
             >
-              <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
-                <p className="font-display font-semibold text-white text-lg">Filter</p>
-                <button onClick={() => setShowFilter(false)} className="text-white/90 hover:text-white transition-colors">
-                  <X size={20} />
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-5 py-2 border-b border-white/10">
+                <p className="font-semibold text-white text-base tracking-tight">Filter</p>
+                <button
+                  onClick={() => setShowFilter(false)}
+                  className="text-white/50 hover:text-white transition-colors p-1 -mr-1"
+                >
+                  <X size={18} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto px-5 py-5">
+
+              {/* Drawer body */}
+              <div className="flex-1 overflow-y-auto px-2.5 py-5 mb-5">
                 <FilterContent />
               </div>
+
+              {/* Drawer footer — shows result count */}
+              {/* <div className="px-5 py-4 border-t border-white/8">
+                <button
+                  onClick={() => setShowFilter(false)}
+                  className="w-full bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium
+                    py-2.5 rounded-xl transition-colors"
+                >
+                  {filtered.length} бараа харах
+                </button>
+              </div> */}
             </div>
           </>
         )}
 
-        {/* ── Grid ── */}
+        {/* ── Product Grid ── */}
         <div className="flex-1 min-w-0">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -229,7 +341,7 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-white/40 space-y-3">
+            <div className="flex flex-col items-center justify-center py-24 text-white/30 space-y-3">
               <p className="text-5xl">✦</p>
               <p className="font-display text-lg">Бараа олдсонгүй</p>
             </div>

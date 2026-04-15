@@ -56,11 +56,11 @@ export default function Footer() {
         </p>
         </div>
     </div>
-    {/* <a href="https://www.instagram.com/the_skylarq/">
-        <div className="mt-6 pt-4 text-center text-xs text-white/50">
+    <a href="https://www.instagram.com/the_skylarq/">
+        <div className="pt-4 text-center text-xs text-white/50">
         © 2026 FATE. Built by Skylarq.
         </div>
-    </a> */}
+    </a>
     </footer>
   );
 }
