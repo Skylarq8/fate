@@ -8,14 +8,18 @@ import { Product, fmt, primaryImage } from "@/lib/api"
 import { useWishlist } from "@/context/WishlistContext"
 import { useToast } from "@/context/ToastContext"
 import { useCartStore } from "@/store/cartStore"
+import { useProductStore } from "@/store/productStore"
 import { useState } from "react"
 import AddToCartSheet from "./AddToCartSheet"
+import { useRouter } from "next/navigation"
 
 interface Props {
   product: Product
 }
 
 export default function ProductCard({ product }: Props) {
+  const router = useRouter()
+  const setSelectedProduct = useProductStore(s => s.setSelectedProduct)
   const { toggleWishlist, isInWishlist } = useWishlist()
   const { showToast }                    = useToast()
   const addItem                          = useCartStore(s => s.addItem)
@@ -26,6 +30,11 @@ export default function ProductCard({ product }: Props) {
   const price = product.discountEnabled && product.finalPrice
     ? product.finalPrice
     : product.price
+
+  const handleClick = () => {
+    setSelectedProduct(product) // 🔥 data store-д хадгална
+    router.push(`/product/${product.id}`)
+  }
 
   const handleWishlist = () => {
     if (liked) {
@@ -43,8 +52,7 @@ export default function ProductCard({ product }: Props) {
     } as any)
   }
 
-  const handleAddToCart = () => {
-        // size эсвэл color байвал sheet нээнэ, үгүй бол шууд нэмнэ
+  const handleAddToCart = () => { 
     if (product.sizes.length > 0 || product.colors.length > 0) {
       setShowSheet(true)
     } else {
@@ -67,7 +75,7 @@ export default function ProductCard({ product }: Props) {
     <>
       <Link href={`/products/${product.id}`} className="group block">
       {/* bg-white/10 backdrop-blur-md */}
-        <div className="rounded-2xl border border-white/20 transition hover:shadow-lg hover:bg-white/20">
+        <div onClick={handleClick} className="rounded-2xl border border-white/20 transition hover:shadow-lg hover:bg-white/20">
           {/* image */}
           <div className="relative aspect-square overflow-hidden rounded-t-2xl">
             {img ? (

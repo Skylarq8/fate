@@ -5,12 +5,16 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ""
 const cache = new Map<string, { data: any; ts: number }>()
 const CACHE_TTL = 60_000
 
-async function cachedFetch(url: string) {
-  const hit = cache.get(url)
+async function cachedFetch(url: string, options?: RequestInit) {
+  const cacheKey = options?.method === "POST" ? `${url}:${JSON.stringify(options.body)}` : url
+  const hit = cache.get(cacheKey)
+  
   if (hit && Date.now() - hit.ts < CACHE_TTL) return hit.data
-  const res  = await fetch(url)
+  
+  const res  = await fetch(url, options)
   const data = await res.json()
-  cache.set(url, { data, ts: Date.now() })
+  
+  cache.set(cacheKey, { data, ts: Date.now() })
   return data
 }
 
@@ -53,8 +57,18 @@ export interface Product {
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
-export async function getProducts(): Promise<Product[]> {
-  const data = await cachedFetch(`${BASE_URL}/api/products`)
+export async function getProducts(options?: {
+  category?: string
+  sort?: string
+  filter?: string
+}): Promise<Product[]> {
+  const params = new URLSearchParams()
+  if (options?.category && options.category !== "all") params.set("category", options.category)
+  if (options?.sort) params.set("sort", options.sort)
+  if (options?.filter) params.set("filter", options.filter)
+  const query = params.toString()
+  const url = query ? `${BASE_URL}/api/products?${query}` : `${BASE_URL}/api/products`
+  const data = await cachedFetch(url)
   return (data.data ?? []).filter((p: Product) => p.status === "active")
 }
 

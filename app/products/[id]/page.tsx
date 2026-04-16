@@ -14,12 +14,16 @@ import ProductCard from "@/components/ProductCard"
 import Accordin from "@/components/Accordin"
 import Footer from "@/components/Footer"
 import { useRouter } from "next/navigation"
+import { useProductStore } from "@/store/productStore"
 
 
 type SelectedVariants = Record<string, string>;
 
 export default function ProductDetailPage() {
   const { id }    = useParams<{ id: string }>()
+  const productFromStore = useProductStore(s => s.selectedProduct)
+  const [product, setProduct] = useState<Product | null>(productFromStore)
+  const [loading, setLoading] = useState(!productFromStore)
   const addItem   = useCartStore(s => s.addItem)
   const { toggleWishlist, isInWishlist } = useWishlist()
   const { showToast } = useToast()
@@ -28,12 +32,9 @@ export default function ProductDetailPage() {
   const [selectedVariants, setSelectedVariants] = useState<SelectedVariants>({});
   const [selectedColor, setSelectedColor] = useState<string>("")
   const [mainImage, setMainImage] = useState<string>("")
-  const [product,   setProduct]   = useState<Product | null>(null)
   const [related,   setRelated]   = useState<Product[]>([])
-  const [loading,   setLoading]   = useState(true)
   const [activeImg, setActiveImg] = useState(0)
   const [size,      setSize]      = useState("")
-  const [color,     setColor]     = useState("")
   const [timeLeft, setTimeLeft] = useState("")
   const [qty,       setQty]       = useState(1)
   const [touchStartX, setTouchStartX] = useState(0);
@@ -69,24 +70,59 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!id) return
+
+    // store байгаа эсэхийг шалгана
+    if (productFromStore && productFromStore.id === id) {
+      setProduct(productFromStore)
+      setLoading(false)
+      return
+    }
+
+    // үгүй бол fetch
     setLoading(true)
-    setActiveImg(0)
+
     getProduct(id).then(p => {
       setProduct(p)
-      if (p) { setSize(p.sizes[0] ?? ""); setColor(p.colors[0] ?? "") }
       setLoading(false)
     })
-  }, [id])
+  }, [id, productFromStore])
 
   useEffect(() => {
     if (!product) return
-    getProducts().then(all => {
-      const catIds = product.categories.map(c => c.category.id)
-      setRelated(all.filter(p =>
-        p.id !== product.id &&
-        p.categories.some(c => catIds.includes(c.category.id))
-      ).slice(0, 4))
-    })
+
+    setActiveImg(0)
+
+    if (product.sizes.length > 0) {
+      setSize(product.sizes[0])
+    }
+
+    if (product.colors.length > 0) {
+      setSelectedColor(product.colors[0])
+    }
+  }, [product])
+
+  useEffect(() => {
+    if (!product) return
+
+    const slug = product.categories?.[0]?.category?.slug
+    if (!slug) return
+
+    const fetchRelated = async () => {
+      try {
+        const res = getProducts({ category: slug })
+        const data: Product[] = await res
+
+        setRelated(
+          data
+            .filter(p => p.id !== product.id)
+            .slice(0, 4)
+        )
+      } catch (err) {
+        console.error("Failed to load related products", err)
+      }
+    }
+
+    fetchRelated()
   }, [product])
 
 
@@ -285,7 +321,7 @@ export default function ProductDetailPage() {
                 ? "bg-red-500/20 text-red-400 border border-red-500/40"
                 : "bg-yellow-400/20 text-yellow-300 border border-yellow-400/40"
               }`}>
-              ⏳ Хямдрал дуусах:{" "}
+              ⏳ Хямдрал дуусахад:{" "}
               {remainingTime.days}х {remainingTime.hours}ц {remainingTime.minutes}м {remainingTime.seconds}с
             </div>
           )}

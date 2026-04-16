@@ -16,7 +16,7 @@ type Props = {
   category: CategoryWithCount
   level?: number
   activeCategory: string
-  setActiveCategory: (id: string) => void
+  setActiveCategory: (id: string, slug: string) => void
   openCategories: string[]
   toggleCategory: (id: string) => void
   setShowFilter: (v: boolean) => void
@@ -33,13 +33,13 @@ export default function CategoryItem({
 }: Props) {
   const isOpen = openCategories.includes(category.id)
   const hasChildren = category.children && category.children.length > 0
-  const isActive = activeCategory === category.id
+  const isActive = activeCategory === category.slug
 
   const handleClick = () => {
     if (hasChildren) {
       toggleCategory(category.id)
     } else {
-      setActiveCategory(category.id)
+      setActiveCategory(category.slug, category.slug)
       setShowFilter(false)
     }
   }
