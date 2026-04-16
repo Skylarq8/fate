@@ -8,6 +8,7 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@noble/curves", "@noble/ciphers"],
   turbopack: {},
   images: {
     remotePatterns: [
