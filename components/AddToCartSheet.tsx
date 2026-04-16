@@ -21,20 +21,44 @@ export default function AddToCartSheet({ product, onClose }: Props) {
   const { showToast } = useToast()
 
   const [selectedVariants, setSelectedVariants] = useState<SelectedVariants>({});
-  const [size,    setSize]    = useState(product.sizes[0]  ?? "")
-  const [color,   setColor]   = useState(product.colors[0] ?? "")
-  const [qty,     setQty]     = useState(1)
-  const [added,   setAdded]   = useState(false)
-  const [show,    setShow]    = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
+  const [size,        setSize]        = useState(product.sizes[0]  ?? "")
+  const [color,       setColor]       = useState(product.colors[0] ?? "")
+  const [qty,         setQty]         = useState(1)
+  const [added,       setAdded]       = useState(false)
+  const [show,        setShow]        = useState(false)
+  const [mounted,     setMounted]     = useState(false)
+  const [isDesktop,   setIsDesktop]   = useState(false)
+  const [animProgress, setAnimProgress] = useState(0)
 
   const img =
-    product.images.find(i => i.variantColor === color) || 
+    product.images.find(i => i.variantColor === color) ||
     product.images.find(i => i.isPrimary) ||
-    product.images[0]  
+    product.images[0]
   const price = product.discountEnabled && product.finalPrice
     ? product.finalPrice : product.price
+
+  // Count-up animation
+  useEffect(() => {
+    if (!price) return
+    setAnimProgress(0)
+    const duration = 900
+    const startTime = performance.now()
+    let frame: number
+    const step = (now: number) => {
+      const t = Math.min((now - startTime) / duration, 1)
+      const ease = 1 - Math.pow(1 - t, 3)
+      setAnimProgress(ease)
+      if (t < 1) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [price])
+
+  const displayPrice         = Math.round(price * animProgress)
+  const displayOriginalPrice = Math.round(product.price * animProgress)
+  const discountPct          = product.discountEnabled && product.finalPrice
+    ? Math.round((1 - product.finalPrice / product.price) * 100) : 0
+  const displayDiscount      = Math.round(discountPct * animProgress)
 
   useEffect(() => {
     setMounted(true)
@@ -107,10 +131,15 @@ export default function AddToCartSheet({ product, onClose }: Props) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-white font-semibold text-[18px] lg:text-[20px] line-clamp-2 leading-snug">{product.title}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-white font-bold text-lg lg:text-[20px]">{fmt(price)}</span>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="text-white font-bold text-xl lg:text-2xl tabular-nums">{fmt(displayPrice)}</span>
             {product.discountEnabled && product.finalPrice && (
-              <span className="text-white/35 line-through text-sm lg:text-[16px]">{fmt(product.price)}</span>
+              <>
+                <span className="text-white/35 line-through text-sm lg:text-[15px] tabular-nums">{fmt(displayOriginalPrice)}</span>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white bg-red-500 tabular-nums">
+                  -{displayDiscount}%
+                </span>
+              </>
             )}
           </div>
         </div>
@@ -226,7 +255,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
           style={{ zIndex: 9999, pointerEvents: "none" }}
         >
           <div
-            className="glass rounded-3xl w-full bg-black/90 max-w-sm transition-all duration-300"
+            className="glass rounded-3xl w-full bg-black/90 max-w-md transition-all duration-300"
             style={{
               pointerEvents: "all",
               opacity:    show ? 1 : 0,

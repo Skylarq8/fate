@@ -39,6 +39,7 @@ export default function ProductDetailPage() {
   const [qty,       setQty]       = useState(1)
   const [touchStartX, setTouchStartX] = useState(0);
   const [added,     setAdded]     = useState(false)
+  const [animProgress, setAnimProgress] = useState(0)
   const [remainingTime, setRemainingTime] = useState<{
     days: number
     hours: number
@@ -157,6 +158,29 @@ export default function ProductDetailPage() {
   const price = product
     ? (product.discountEnabled && product.finalPrice ? product.finalPrice : product.price)
     : 0
+
+  // Count-up animation: 0→1 progress drives all price displays
+  useEffect(() => {
+    if (!price) return
+    setAnimProgress(0)
+    const duration = 900
+    const startTime = performance.now()
+    let frame: number
+    const step = (now: number) => {
+      const t = Math.min((now - startTime) / duration, 1)
+      const ease = 1 - Math.pow(1 - t, 3) // ease-out cubic
+      setAnimProgress(ease)
+      if (t < 1) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [price])
+
+  const displayPrice         = Math.round(price * animProgress)
+  const displayOriginalPrice = product ? Math.round(product.price * animProgress) : 0
+  const discountPct          = product?.discountEnabled && product?.finalPrice
+    ? Math.round((1 - product.finalPrice / product.price) * 100) : 0
+  const displayDiscount      = Math.round(discountPct * animProgress)
 
   const handleAddToCart = () => {
     if (!product) return
@@ -304,12 +328,12 @@ export default function ProductDetailPage() {
 
           {/* Price */}
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-white">{fmt(price)}</span>
+            <span className="text-3xl font-bold text-white tabular-nums">{fmt(displayPrice)}</span>
             {product.discountEnabled && product.finalPrice && (
               <>
-                <span className="text-rose-500 line-through text-xl">{fmt(product.price)}</span>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white bg-red-500">
-                  -{Math.round((1 - product.finalPrice / product.price) * 100)}%
+                <span className="text-rose-500 line-through text-xl tabular-nums">{fmt(displayOriginalPrice)}</span>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white bg-red-500 tabular-nums">
+                  -{displayDiscount}%
                 </span>
               </>
             )}

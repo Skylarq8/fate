@@ -11,14 +11,12 @@ import { useCartStore } from "@/store/cartStore"
 import { useProductStore } from "@/store/productStore"
 import { useState } from "react"
 import AddToCartSheet from "./AddToCartSheet"
-import { useRouter } from "next/navigation"
 
 interface Props {
   product: Product
 }
 
 export default function ProductCard({ product }: Props) {
-  const router = useRouter()
   const setSelectedProduct = useProductStore(s => s.setSelectedProduct)
   const { toggleWishlist, isInWishlist } = useWishlist()
   const { showToast }                    = useToast()
@@ -30,11 +28,6 @@ export default function ProductCard({ product }: Props) {
   const price = product.discountEnabled && product.finalPrice
     ? product.finalPrice
     : product.price
-
-  const handleClick = () => {
-    setSelectedProduct(product) // 🔥 data store-д хадгална
-    router.push(`/product/${product.id}`)
-  }
 
   const handleWishlist = () => {
     if (liked) {
@@ -73,9 +66,9 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <>
-      <Link href={`/products/${product.id}`} className="group block">
+      <Link href={`/products/${product.id}`} onClick={() => setSelectedProduct(product)} className="group block">
       {/* bg-white/10 backdrop-blur-md */}
-        <div onClick={handleClick} className="rounded-2xl border border-white/20 transition hover:shadow-lg hover:bg-white/20">
+        <div className="rounded-2xl border border-white/20 transition hover:shadow-lg hover:bg-white/20">
           {/* image */}
           <div className="relative aspect-square overflow-hidden rounded-t-2xl">
             {img ? (
@@ -109,7 +102,7 @@ export default function ProductCard({ product }: Props) {
               </div>
             </div>
 
-            <div className="flex flex-row items-center gap-x-1.5 mt-2" onClick={e => e.preventDefault()}>
+            <div className="flex flex-row items-center gap-x-1.5 mt-2" onClick={e => { e.preventDefault(); e.stopPropagation() }}>
               <button onClick={handleWishlist}
                 className="p-2 rounded-sm glass-sm backdrop-blur-md hover:bg-rose-500 transition-all border border-white/20 text-white/90"
                 style={liked ? { border: "1px solid rgba(239,68,68,0.4)", background: "rgba(239,68,68,0.15)" } : {}}>

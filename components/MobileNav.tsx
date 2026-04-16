@@ -2,53 +2,42 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Heart, Home, Package, ShoppingCart, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Heart, Home, Package, ShoppingCart } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCartStore } from "@/store/cartStore";
 
 export default function MobileNav() {
   const [show, setShow] = useState(true);
-  // const [lastScrollY, setLastScrollY] = useState(0);
+  const pathname = usePathname();
   const { wishlist } = useWishlist();
   const { items } = useCartStore();
 
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   const lastScrollY = useRef(0);
-  const ticking = useRef(false);
-
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     if (window.scrollY > lastScrollY) {
-  //       setShow(false); // доош scroll → нуух
-  //     } else {
-  //       setShow(true); // дээш scroll → харуулах
-  //     }
-  //     setLastScrollY(window.scrollY);
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, [lastScrollY]);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      // жижиг scroll ignore (5px-аас бага бол тоохгүй)
-      if (Math.abs(currentScroll - lastScrollY.current) < 10) return;
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          if (currentScroll > lastScrollY.current) {
-            setShow(false); // доош → нуух
-          } else {
-            setShow(true); // дээш → харуулах
-          }
-          lastScrollY.current = currentScroll;
-          ticking.current = false;
-        });
+      // iOS overscroll rubber-band дүнд scrollY < 0 байж болно → 0-д хавчуулна
+      const current = Math.max(0, window.scrollY);
+      const diff = current - lastScrollY.current;
 
-        ticking.current = true;
+      if (Math.abs(diff) < 5) return; // жижиг хөдөлгөөн тооцохгүй
+
+      if (current <= 0) {
+        setShow(true);          // хамгийн дээд хэсэгт → үргэлж харагдана
+      } else if (diff > 0) {
+        setShow(false);         // доошоо scroll → нуух
+      } else {
+        setShow(true);          // дээшээ scroll → харуулах
       }
+
+      lastScrollY.current = current;
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -58,30 +47,34 @@ export default function MobileNav() {
       ${show ? "translate-y-0" : "translate-y-full"}`}
     >
       <div className="flex justify-around items-center h-16">
-        <Link href="/" className="flex flex-col items-center text-xs">
+        <Link href="/" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/") ? "text-rose-500" : "text-white/90"}`}>
           <Home size={20} />
           Нүүр
         </Link>
-        <Link href="/products" className="flex flex-col items-center text-xs">
+        <Link href="/products" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/products") ? "text-rose-500" : "text-white/90"}`}>
           <Package size={20} />
           Бүх бараа
         </Link>
-        <Link href="/wishlist" className="flex flex-col items-center text-xs relative">
-        {wishlist.length > 0 && (
-          <span className="absolute -top-3 right-1 bg-rose-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-            {wishlist.length}
-             </span>
-         )}
-          <Heart size={20} />
+        <Link href="/wishlist" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/wishlist") ? "text-rose-500" : "text-white/90"}`}>
+          <span className="relative">
+            <Heart size={20} />
+            {wishlist.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                {wishlist.length}
+              </span>
+            )}
+          </span>
           Таалагдсан
         </Link>
-        <Link href="/cart" className="flex flex-col items-center text-xs">
-          {items.length > 0 && (
-            <span className="absolute -top-2 -right-2 mr-6 mt-2 bg-rose-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              {items.length}
+        <Link href="/cart" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/cart") ? "text-rose-500" : "text-white/90"}`}>
+          <span className="relative">
+            <ShoppingCart size={20} />
+            {items.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                {items.length}
               </span>
-          )}
-          <ShoppingCart size={20} />
+            )}
+          </span>
           Сагс
         </Link>
       </div>

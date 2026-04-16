@@ -32,10 +32,7 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     setMounted(true)
     getProducts().then(setAllProducts)
-    requestAnimationFrame(() => {
-      setShow(true)
-      setTimeout(() => inputRef.current?.focus(), 50)
-    })
+    requestAnimationFrame(() => setShow(true))
   }, [])
 
   useEffect(() => {
@@ -82,6 +79,7 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
           <Search size={18} className="text-white/40 flex-shrink-0" />
           <input
             ref={inputRef}
+            autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}

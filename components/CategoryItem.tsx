@@ -72,8 +72,8 @@ export default function CategoryItem({
 
         {/* Right: count badge OR chevron */}
         <span className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Product count badge */}
-          {category.productCount > 0 && (
+          {/* Count badge: always on leaf, hidden on expanded parent */}
+          {category.productCount > 0 && (!hasChildren || !isOpen) && (
             <span className={`
               text-[11px] px-1.5 py-0.5 rounded-md font-medium tabular-nums
               transition-colors duration-200
