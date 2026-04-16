@@ -102,7 +102,9 @@ export default function AddToCartSheet({ product, onClose }: Props) {
     addItem({
       productId: product.id,
       title: product.title,
-      price,
+      price: product.price,
+      discountEnabled: product.discountEnabled || false,
+      finalPrice: product.discountEnabled && product.finalPrice ? product.finalPrice : undefined,
       image: imgToAdd?.url ?? "",
       size,
       color,
@@ -135,7 +137,7 @@ export default function AddToCartSheet({ product, onClose }: Props) {
             <span className="text-white font-bold text-xl lg:text-2xl tabular-nums">{fmt(displayPrice)}</span>
             {product.discountEnabled && product.finalPrice && (
               <>
-                <span className="text-white/35 line-through text-sm lg:text-[15px] tabular-nums">{fmt(displayOriginalPrice)}</span>
+                <span className="text-rose-500 line-through text-sm lg:text-[15px] tabular-nums">{fmt(displayOriginalPrice)}</span>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white bg-red-500 tabular-nums">
                   -{displayDiscount}%
                 </span>

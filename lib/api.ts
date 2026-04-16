@@ -1,21 +1,13 @@
 // 📁 lib/api.ts
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
-// ── Simple in-memory cache ────────────────────────────────────────────────────
-const cache = new Map<string, { data: any; ts: number }>()
-const CACHE_TTL = 60_000
-
+// Uses Next.js Data Cache — persists across cold starts and all Lambda instances
 async function cachedFetch(url: string, options?: RequestInit) {
-  const cacheKey = options?.method === "POST" ? `${url}:${JSON.stringify(options.body)}` : url
-  const hit = cache.get(cacheKey)
-  
-  if (hit && Date.now() - hit.ts < CACHE_TTL) return hit.data
-  
-  const res  = await fetch(url, options)
-  const data = await res.json()
-  
-  cache.set(cacheKey, { data, ts: Date.now() })
-  return data
+  const res = await fetch(url, {
+    ...options,
+    next: { revalidate: 60 },
+  } as RequestInit & { next: { revalidate: number } })
+  return res.json()
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────

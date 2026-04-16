@@ -2,14 +2,24 @@ import Accordin from "@/components/Accordin";
 import Footer from "@/components/Footer";
 import HeroSlider from "@/components/HeroSlider";
 import ProductSlider from "@/components/ProductSlider";
-import { getProducts } from "@/lib/api";
+import { getProducts, Product } from "@/lib/api";
+
+export const revalidate = 60
 
 export default async function Home() {
-  const [discount, newArrivals, all] = await Promise.all([
-    getProducts({ filter: "discount" }),
-    getProducts({ filter: "newest" }),
-    getProducts({ filter: "oldest" }),
-  ])
+  const allProducts = await getProducts()
+
+  const discount = allProducts.filter(
+    (p: Product) => p.discountEnabled && p.finalPrice
+  )
+  const newArrivals = [...allProducts].sort(
+    (a: Product, b: Product) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+  const all = [...allProducts].sort(
+    (a: Product, b: Product) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  )
 
   return (
     <div>

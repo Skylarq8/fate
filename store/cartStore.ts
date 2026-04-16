@@ -8,7 +8,8 @@ export interface CartItem {
   productId: string
   title: string
   price: number
-  originalPrice?: number
+  discountEnabled?: boolean
+  finalPrice?: number
   image: string
   size: string
   color: string
@@ -85,14 +86,15 @@ export const useCartStore = create<CartStore>()(
       totalCount: () => get().items.reduce((s, i) => s + i.quantity, 0),
 
       // барааны үндсэн нийт (хямдралгүй)
-      totalPrice: () => get().items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0),
+      totalPrice: () => get().items.reduce((s, i) => s + i.price * i.quantity, 0),
 
-      // барааны хямдрал хасагдсан дүн
+      // барааны хямдрал хасагдсан дүн (finalPrice ашиглана)
       subtotal: () => {
         const items = get().items
-        const base     = items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0)
-        const prodDisc = items.reduce((s, i) => i.originalPrice ? s + (i.originalPrice - i.price) * i.quantity : s, 0)
-        return base - prodDisc
+        return items.reduce((s, i) => {
+          const actualPrice = i.discountEnabled && i.finalPrice ? i.finalPrice : i.price
+          return s + actualPrice * i.quantity
+        }, 0)
       },
 
       shippingFee: () => get().subtotal() >= 100000 ? 0 : 5000,

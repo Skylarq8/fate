@@ -4,10 +4,12 @@
 import Link from "next/link"
 import { Minus, Plus, Trash2, ShoppingCart, Tag, X } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
+import type { CartItem, CouponState } from "@/store/cartStore"
 import { fmt } from "@/lib/api"
-import type { CouponState } from "@/store/cartStore"
+import type { Product } from "@/lib/api"
 import { useState, useMemo } from "react"
 import Accordin from "@/components/Accordin"
+import { useProductStore } from "@/store/productStore"
 
 type AppliedCoupon = {
   code: string
@@ -17,8 +19,28 @@ type AppliedCoupon = {
   products: string[]
 }
 
+function cartItemToProduct(item: CartItem): Product {
+  return {
+    id: item.productId,
+    title: item.title,
+    description: "",
+    price: item.price,
+    finalPrice: item.finalPrice ?? null,
+    discountEnabled: item.discountEnabled ?? false,
+    discountEndsAt: null,
+    sizes: item.size ? [item.size] : [],
+    colors: item.color ? [item.color] : [],
+    status: "active",
+    createdAt: "",
+    images: item.image ? [{ id: "0", url: item.image, isPrimary: true, order: 0 }] : [],
+    categories: [],
+    variants: item.variants?.map((v, i) => ({ id: String(i), label: v.label, values: [v.value], order: i })),
+  }
+}
+
 export default function CartPage() {
   const { items, removeItem, increaseQty, decreaseQty, totalPrice, clearCart, setCoupon } = useCartStore()
+  const setSelectedProduct = useProductStore(s => s.setSelectedProduct)
   const shipping = totalPrice() >= 100000 ? 0 : 5000
 
   const [couponCode, setCouponCode] = useState("")
@@ -27,12 +49,12 @@ export default function CartPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null)
 
   const baseTotal = items.reduce((sum, item) => {
-    return sum + (item.originalPrice || item.price) * item.quantity
+    return sum + item.price * item.quantity
   }, 0)
 
   const productDiscount = items.reduce((sum, item) => {
-    if (item.originalPrice) {
-      return sum + (item.originalPrice - item.price) * item.quantity
+    if (item.discountEnabled && item.finalPrice) {
+      return sum + (item.price - item.finalPrice) * item.quantity
     }
     return sum
   }, 0)
@@ -56,7 +78,7 @@ export default function CartPage() {
       )
 
       const matchingItemsTotal = matchingItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) => sum + (item.discountEnabled && item.finalPrice ? item.finalPrice : item.price) * item.quantity,
         0
       )
 
@@ -78,7 +100,7 @@ export default function CartPage() {
     subtotal,
     discountAmount,
     shipping,
-    finalTotal
+    finalTotal,
   })
 
   const handleApplyCoupon = async () => {
@@ -176,7 +198,7 @@ export default function CartPage() {
         <div className="md:col-span-2 space-y-3">
           {items.map(item => (
             <div key={item.id}>
-              <Link href={`/products/${item.productId}`}>
+              <Link href={`/products/${item.productId}`} onClick={() => setSelectedProduct(cartItemToProduct(item))}>
                 <div className="glass rounded-2xl py-4 flex gap-4 glass-hover">
                   <div className="w-30 h-30 rounded-xl overflow-hidden flex-shrink-0 bg-white/5">
                     {item.image
@@ -196,9 +218,11 @@ export default function CartPage() {
                       ))}
                     </div>
                     <div className="flex mt-2 flex-col justify-center pr-1">
-                      <p className="text-white font-bold text-lg">{fmt(item.price)}</p>
-                      {item.originalPrice && (
-                        <p className="text-rose-500 line-through text-[14px] mt-0.5">{fmt(item.originalPrice)}</p>
+                      <p className="text-white font-bold text-lg">
+                        {fmt(item.discountEnabled && item.finalPrice ? item.finalPrice : item.price)}
+                      </p>
+                      {item.discountEnabled && item.finalPrice && (
+                        <p className="text-rose-500 line-through text-[14px] mt-0.5">{fmt(item.price)}</p>
                       )}
                     </div>
                   </div>
@@ -235,7 +259,9 @@ export default function CartPage() {
               {items.map(item => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span className="text-white/90 truncate max-w-[55%]">{item.title} × {item.quantity}</span>
-                  <span className="text-white/90 font-medium">{fmt(item.price * item.quantity)}</span>
+                  <span className="text-white/90 font-medium">
+                    {fmt((item.discountEnabled && item.finalPrice ? item.finalPrice : item.price) * item.quantity)}
+                  </span>
                 </div>
               ))}
             </div>

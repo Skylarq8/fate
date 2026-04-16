@@ -53,7 +53,7 @@ export default function ProductCard({ product }: Props) {
         productId:     product.id,
         title:         product.title,
         price,
-        originalPrice: product.discountEnabled && product.finalPrice ? product.price : undefined,
+        finalPrice: product.discountEnabled && product.finalPrice ? product.price : undefined,
         image:         img?.url ?? "",
         size:          "",
         color:         "",

@@ -82,10 +82,9 @@ export default function ProductDetailPage() {
     // үгүй бол fetch
     setLoading(true)
 
-    getProduct(id).then(p => {
-      setProduct(p)
-      setLoading(false)
-    })
+    getProduct(id)
+      .then(p => setProduct(p))
+      .finally(() => setLoading(false))
   }, [id, productFromStore])
 
   useEffect(() => {

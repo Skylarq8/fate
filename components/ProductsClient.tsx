@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Product, Category } from "@/lib/api"
 import ProductCard from "@/components/ProductCard"
 import CategoryItem, { CategoryWithCount } from "@/components/CategoryItem"
-import { SlidersHorizontal, X, ChevronDown, ChevronUp } from "lucide-react"
+import { SlidersHorizontal, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react"
 
 const SORT_OPTIONS = [
   { value: "discount",   label: "Хямдралтай эхэндээ" },
@@ -35,39 +36,46 @@ function enrichCategory(cat: Category): CategoryWithCount {
 }
 
 interface Props {
-  initialProducts: Product[]
-  initialCategories: Category[]
+  products: Product[]
+  categories: Category[]
+  total: number
+  page: number
+  totalPages: number
+  activeCategory: string
+  sort: string
 }
 
-export default function ProductsClient({ initialProducts, initialCategories }: Props) {
-  const [activeCategory, setActiveCategory] = useState("all")
-  const [sort,           setSort]           = useState("discount")
+export default function ProductsClient({
+  products,
+  categories,
+  total,
+  page,
+  totalPages,
+  activeCategory,
+  sort,
+}: Props) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [showFilter,     setShowFilter]     = useState(false)
   const [sortOpen,       setSortOpen]       = useState(false)
   const [openCategories, setOpenCategories] = useState<string[]>([])
-  const [categorySearch, setCategorySearch] = useState("")
 
-  const categories = useMemo(
-    () => initialCategories.map(enrichCategory),
-    [initialCategories]
+  const enrichedCategories = useMemo(
+    () => categories.map(enrichCategory),
+    [categories]
   )
 
   const parentCategories = useMemo(
-    () => categories.filter(c => !c.parentId),
-    [categories]
+    () => enrichedCategories.filter(c => !c.parentId),
+    [enrichedCategories]
   )
 
   const flatCategories = useMemo(() => {
     const flatten = (cats: CategoryWithCount[]): CategoryWithCount[] =>
       cats.flatMap(c => [c, ...flatten(c.children)])
-    return flatten(categories)
-  }, [categories])
+    return flatten(enrichedCategories)
+  }, [enrichedCategories])
 
-  const handleSetCategory = (_id: string, slug: string) => {
-    setActiveCategory(slug)
-  }
-
-  // Filter drawer нээгдэх үед background scroll хаах
   useEffect(() => {
     document.body.style.overflow = showFilter ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
@@ -79,40 +87,36 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
     )
   }
 
-  const filteredParentCategories = useMemo(() => {
-    if (!categorySearch.trim()) return parentCategories.slice().reverse()
-    const q = categorySearch.toLowerCase()
-    return parentCategories
-      .slice()
-      .reverse()
-      .filter(cat =>
-        cat.name.toLowerCase().includes(q) ||
-        cat.children.some(child => child.name.toLowerCase().includes(q))
-      )
-  }, [parentCategories, categorySearch])
+  const filteredParentCategories = useMemo(
+    () => parentCategories.slice().reverse(),
+    [parentCategories]
+  )
 
-  // Client-side category filter + sort (no extra API calls)
-  const sorted = useMemo(() => {
-    const base = activeCategory === "all"
-      ? initialProducts
-      : initialProducts.filter(p =>
-          p.categories.some(c => c.category.slug === activeCategory)
-        )
-    return base.slice().sort((a: Product, b: Product) => {
-      const pa = a.discountEnabled && a.finalPrice ? a.finalPrice : a.price
-      const pb = b.discountEnabled && b.finalPrice ? b.finalPrice : b.price
-      if (sort === "newest")     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      if (sort === "oldest")     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      if (sort === "price_asc")  return pa - pb
-      if (sort === "price_desc") return pb - pa
-      if (sort === "discount") {
-        const da = a.discountEnabled && a.finalPrice ? 1 : 0
-        const db = b.discountEnabled && b.finalPrice ? 1 : 0
-        return db - da
-      }
-      return 0
-    })
-  }, [initialProducts, activeCategory, sort])
+  const totalCount = useMemo(
+    () => parentCategories.reduce((acc, c) => acc + c.productCount, 0),
+    [parentCategories]
+  )
+
+  const buildUrl = (updates: { category?: string; sort?: string; page?: number }) => {
+    const sp = new URLSearchParams()
+    const cat = updates.category ?? activeCategory
+    const s   = updates.sort     ?? sort
+    const p   = updates.page     ?? 1
+    if (cat !== "all")    sp.set("category", cat)
+    if (s   !== "discount") sp.set("sort", s)
+    if (p   > 1)          sp.set("page", String(p))
+    const q = sp.toString()
+    return q ? `/products?${q}` : "/products"
+  }
+
+  const navigate = (updates: { category?: string; sort?: string; page?: number }) => {
+    startTransition(() => router.push(buildUrl(updates)))
+  }
+
+  const handleSetCategory = (_id: string, slug: string) => {
+    navigate({ category: slug })
+    setShowFilter(false)
+  }
 
   const activeCategoryName = activeCategory === "all"
     ? null
@@ -120,14 +124,17 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
 
   const currentSort = SORT_OPTIONS.find(o => o.value === sort)?.label ?? "Эрэмбэлэх"
 
-  const totalCount = useMemo(
-    () => parentCategories.reduce((acc, c) => acc + c.productCount, 0),
-    [parentCategories]
-  )
+  // Page numbers with ellipsis gaps
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1)
+    const around = new Set(
+      [1, page - 1, page, page + 1, totalPages].filter(n => n >= 1 && n <= totalPages)
+    )
+    return [...around].sort((a, b) => a - b)
+  }, [page, totalPages])
 
   const FilterContent = () => (
     <div className="space-y-6">
-
       {/* ── Categories ── */}
       <div>
         <p className="text-[11px] font-semibold tracking-widest text-white/90 uppercase mb-3 px-1">
@@ -138,10 +145,8 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
           scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10
           space-y-0.5 pr-0.5">
 
-          {/* ALL button */}
-          {!categorySearch && (
-            <button
-              onClick={() => { setActiveCategory("all"); setShowFilter(false) }}
+          <button
+              onClick={() => { navigate({ category: "all" }); setShowFilter(false) }}
               className={`
                 group w-full text-left text-sm px-3 py-2 rounded-xl
                 flex items-center justify-between gap-2
@@ -169,9 +174,7 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
                 </span>
               )}
             </button>
-          )}
 
-          {/* Parent categories */}
           {filteredParentCategories.map(parent => (
             <CategoryItem
               key={parent.id}
@@ -183,14 +186,9 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
               setShowFilter={setShowFilter}
             />
           ))}
-
-          {categorySearch && filteredParentCategories.length === 0 && (
-            <p className="text-center text-white/25 text-xs py-4">Олдсонгүй</p>
-          )}
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-white/8" />
 
       {/* ── Sort ── */}
@@ -218,7 +216,7 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
               {SORT_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
-                  onClick={() => { setSort(opt.value); setSortOpen(false); setShowFilter(false) }}
+                  onClick={() => { navigate({ sort: opt.value }); setSortOpen(false); setShowFilter(false) }}
                   className={`
                     w-full text-left text-sm px-3.5 py-2.5 rounded-xl transition-all
                     flex items-center justify-between gap-2
@@ -242,7 +240,7 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
   )
 
   return (
-    <div className="max-w-7xl mx-auto py-3">
+    <div className={`max-w-7xl mx-auto py-3 transition-opacity duration-150 ${isPending ? "opacity-50" : "opacity-100"}`}>
 
       {/* ── Header ── */}
       <div className="flex items-end justify-between mb-6">
@@ -252,14 +250,13 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
             <p className="text-white/60 text-sm mt-1">
               <span className="text-rose-500">{activeCategoryName}</span>
               <span className="text-white/30 mx-1.5">·</span>
-              {sorted.length} бараа
+              {total} бараа
             </p>
           ) : (
-            <p className="text-white/50 text-sm mt-1">{sorted.length} бараа</p>
+            <p className="text-white/50 text-sm mt-1">{total} бараа</p>
           )}
         </div>
 
-        {/* Mobile filter button */}
         <button
           onClick={() => setShowFilter(true)}
           className="md:hidden flex items-center gap-2 text-sm text-white/80 px-4 py-2 rounded-xl
@@ -275,14 +272,14 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
 
       <div className="flex gap-6">
 
-        {/* ── Desktop left sidebar ── */}
+        {/* ── Desktop sidebar ── */}
         <aside className="hidden md:block w-72 flex-shrink-0">
           <div className="glass rounded-2xl p-4 sticky top-24">
             <FilterContent />
           </div>
         </aside>
 
-        {/* ── Mobile right drawer ── */}
+        {/* ── Mobile drawer ── */}
         {showFilter && (
           <>
             <div
@@ -311,18 +308,63 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
           </>
         )}
 
-        {/* ── Product Grid ── */}
-        <div className="flex-1 min-w-0">
-          {sorted.length === 0 ? (
+        {/* ── Product grid ── */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {products.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-white/30 space-y-3">
               <p className="text-5xl">✦</p>
               <p className="font-display text-lg">Бараа олдсонгүй</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {sorted.map(product => (
+              {products.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
+            </div>
+          )}
+
+          {/* ── Pagination ── */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-1.5 pt-2">
+              <button
+                onClick={() => navigate({ page: page - 1 })}
+                disabled={page <= 1}
+                className="p-2 rounded-xl border border-white/10 text-white/50 hover:text-white hover:bg-white/8
+                  disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              {pageNumbers.map((n, i) => {
+                const prev = pageNumbers[i - 1]
+                const showEllipsis = prev !== undefined && n - prev > 1
+                return (
+                  <span key={n} className="flex items-center gap-1.5">
+                    {showEllipsis && (
+                      <span className="text-white/20 text-sm px-1">…</span>
+                    )}
+                    <button
+                      onClick={() => navigate({ page: n })}
+                      className={`min-w-[36px] h-9 px-2 rounded-xl text-sm font-medium transition-all
+                        ${n === page
+                          ? "bg-rose-500 text-white"
+                          : "border border-white/10 text-white/50 hover:text-white hover:bg-white/8"
+                        }`}
+                    >
+                      {n}
+                    </button>
+                  </span>
+                )
+              })}
+
+              <button
+                onClick={() => navigate({ page: page + 1 })}
+                disabled={page >= totalPages}
+                className="p-2 rounded-xl border border-white/10 text-white/50 hover:text-white hover:bg-white/8
+                  disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
           )}
         </div>
