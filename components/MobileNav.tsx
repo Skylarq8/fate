@@ -43,7 +43,7 @@ export default function MobileNav() {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-background border-t transition-transform duration-300 lg:hidden
+      className={`fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-t transition-transform duration-300 lg:hidden
       ${show ? "translate-y-0" : "translate-y-full"}`}
     >
       <div className="flex justify-around items-center h-16">
@@ -59,7 +59,7 @@ export default function MobileNav() {
           <span className="relative">
             <Heart size={20} />
             {wishlist.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+              <span className="absolute -top-3 -right-3 bg-rose-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                 {wishlist.length}
               </span>
             )}
@@ -70,7 +70,7 @@ export default function MobileNav() {
           <span className="relative">
             <ShoppingCart size={20} />
             {items.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+              <span className="absolute -top-3 -right-3 bg-rose-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                 {items.length}
               </span>
             )}

@@ -200,7 +200,7 @@ export default function CartPage() {
             <div key={item.id}>
               <Link href={`/products/${item.productId}`} onClick={() => setSelectedProduct(cartItemToProduct(item))}>
                 <div className="glass rounded-2xl py-4 flex gap-4 glass-hover">
-                  <div className="w-30 h-30 rounded-xl overflow-hidden flex-shrink-0 bg-white/5">
+                  <div className="w-36 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-white/5">
                     {item.image
                       ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                       : <div className="w-full h-full" style={{ background: "linear-gradient(135deg, rgba(167,139,250,0.2), rgba(96,165,250,0.2))" }} />

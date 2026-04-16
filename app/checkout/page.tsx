@@ -342,14 +342,22 @@ export default function CheckoutPage() {
   const [errors,          setErrors]          = useState<Record<string, string>>({})
 
   const shipping        = totalPrice() >= 100000 ? 0 : 5000
-  const baseTotal       = items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0)
-  const productDiscount = items.reduce((s, i) => i.originalPrice ? s + (i.originalPrice - i.price) * i.quantity : s, 0)
+    const baseTotal = items.reduce((sum, item) => {
+    return sum + item.price * item.quantity
+  }, 0)
+
+  const productDiscount = items.reduce((sum, item) => {
+    if (item.discountEnabled && item.finalPrice) {
+      return sum + (item.price - item.finalPrice) * item.quantity
+    }
+    return sum
+  }, 0)
   const subtotal        = baseTotal - productDiscount
 
   const couponDiscount = (() => {
     if (!couponData && !coupon) return 0
     const c = couponData || coupon
-    if (c.type === "percent" && c.discountPercent) {
+    if (c.type === "percentage" && c.discountPercent) {
       return Math.round(subtotal * (c.discountPercent / 100))
     }
     if (c.type === "amount" && c.discountAmount) {
@@ -600,7 +608,7 @@ export default function CheckoutPage() {
               <div className="space-y-3 pb-2">
                 {items.map(item => (
                   <div key={item.id} className="flex gap-3 items-start">
-                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
+                    <div className="w-36 h-36 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
                       {item.image
                         ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                         : <div className="w-full h-full bg-white/5" />
@@ -608,7 +616,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex flex-col">
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-[18px] font-medium line-clamp-1">{item.title}</p>
+                        <p className="text-white text-xl font-medium line-clamp-1">{item.title}</p>
                         <div className="flex gap-1.5 mt-0.5 items-center">
                           {item.size  && <span className="text-white/50 text-[14px]">{item.size}</span>}
                           {item.color && <span className="text-white/50 text-[14px] uppercase">{item.color}</span>}
@@ -621,10 +629,10 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="text-white text-[16px] font-semibold flex-shrink-0">{fmt(item.price * item.quantity)}</span>
-                        {item.originalPrice && (
-                          <p className="text-rose-500 line-through text-[13px] mt-0.5">{fmt(item.originalPrice * item.quantity)}</p>
-                        )}
+                        <span className="text-white text-lg font-semibold flex-shrink-0">{fmt(item.discountEnabled && item.finalPrice ? item.finalPrice : item.price)}</span>
+                        {item.discountEnabled && item.finalPrice && (
+                        <p className="text-rose-500 line-through text-[14px] mt-0.5">{fmt(item.price)}</p>
+                      )}
                       </div>
                     </div>
                   </div>
@@ -637,12 +645,10 @@ export default function CheckoutPage() {
                     <span className="text-green-400">-{fmt(productDiscount)}</span>
                   </div>
                 )}
-                {couponDiscount > 0 && (
+                {couponDiscount > 0 && (couponData || coupon) && (
                   <div className="flex justify-between text-[14px]">
-                    <span className="text-white/80">Купон хямдрал
-                      {couponData?.discountPercent && (
-                        <span className="ml-1 text-rose-500">{couponData.discountPercent}%</span>
-                      )}
+                    <span className="text-white/80">
+                      ({(couponData || coupon)?.code}){(couponData || coupon)?.type === "percentage" ? ` -${(couponData || coupon)?.discountPercent}%` : ""}
                     </span>
                     <span className="text-green-400">-{fmt(couponDiscount)}</span>
                   </div>

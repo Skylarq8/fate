@@ -193,6 +193,8 @@ export default function ProductDetailPage() {
       productId: product.id,
       title: product.title,
       price,
+      discountEnabled: product.discountEnabled || false,
+      finalPrice: product.discountEnabled && product.finalPrice ? product.finalPrice : undefined,
       image: img?.url ?? "",
       size,
       color: selectedColor,
