@@ -52,11 +52,26 @@ export async function POST(req: NextRequest) {
     console.log("ORDER DATA:", JSON.stringify(order, null, 2))
 
     // email: payload → backend (email / customerEmail хоёуланг шалгана)
-    const toEmail    = emailFromPayload || order?.email || order?.customerEmail || ""
-    const toName     = customerNameFromPayload || order?.customerName || "Хэрэглэгч"
-    const toTotal    = order?.totalAmount ?? order?.total ?? 0
-    const toItems    = order?.items ?? []
-    const toAddress  = order?.shippingAddress ?? order?.address ?? ""
+    const toEmail   = emailFromPayload || order?.email || order?.customerEmail || ""
+    const toName    = customerNameFromPayload || order?.customerName || "Хэрэглэгч"
+    const toTotal   = Number(order?.totalAmount ?? order?.total ?? 0)
+    const toAddress = order?.shippingAddress ?? order?.address ?? ""
+
+    // Backend-аас ирэх items-ийн field нэрийг normalize хийх
+    const rawItems: any[] = order?.items ?? []
+    const toItems = rawItems.map((item: any) => ({
+      title:     item.product?.title ?? item.title ?? item.productTitle ?? "Бараа",
+      quantity:  item.quantity ?? 1,
+      unitPrice: Number(item.unitPrice ?? item.price ?? 0),
+      size:      item.size  || undefined,
+      color:     item.color || undefined,
+    }))
+
+    // Хүргэлт тооцох (items нийлбэрээс)
+    const itemsSubtotal = toItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0)
+    const shipping      = itemsSubtotal >= 100000 ? 0 : 5000
+    // Coupon хөнгөлөлт = items нийлбэр + хүргэлт - эцсийн дүн
+    const couponDiscount = Math.max(0, itemsSubtotal + shipping - toTotal)
 
     if (!toEmail) {
       console.error("❌ No email found — payload:", emailFromPayload, "order:", order?.email)
@@ -73,6 +88,8 @@ export async function POST(req: NextRequest) {
         totalAmount:     toTotal,
         items:           toItems,
         shippingAddress: toAddress,
+        shipping,
+        couponDiscount,
       }),
     })
 

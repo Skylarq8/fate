@@ -12,6 +12,8 @@ interface OrderEmailProps {
   totalAmount: number
   items: OrderItem[]
   shippingAddress: string
+  shipping?: number
+  couponDiscount?: number
 }
 
 function fmt(amount: number) {
@@ -24,6 +26,8 @@ export function orderConfirmationHtml({
   totalAmount,
   items,
   shippingAddress,
+  shipping = 0,
+  couponDiscount = 0,
 }: OrderEmailProps): string {
   const shortId = orderId.slice(-8).toUpperCase()
 
@@ -77,14 +81,23 @@ export function orderConfirmationHtml({
                 ${itemRows}
               </table>
 
-              <!-- Total -->
+              <!-- Total breakdown -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
                   <td style="padding:16px;background:#1a1a1a;border-radius:10px;">
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="color:#999;font-size:14px;">Нийт дүн</td>
-                        <td style="color:#f43f5e;font-size:18px;font-weight:700;text-align:right;">${fmt(totalAmount)}</td>
+                        <td style="color:#999;font-size:14px;padding-bottom:8px;">Хүргэлт</td>
+                        <td style="font-size:14px;text-align:right;padding-bottom:8px;color:${shipping === 0 ? "#4ade80" : "#e5e5e5"};">${shipping === 0 ? "Үнэгүй" : fmt(shipping)}</td>
+                      </tr>
+                      ${couponDiscount > 0 ? `
+                      <tr>
+                        <td style="color:#999;font-size:14px;padding-bottom:8px;">Купон хөнгөлөлт</td>
+                        <td style="color:#4ade80;font-size:14px;text-align:right;padding-bottom:8px;">-${fmt(couponDiscount)}</td>
+                      </tr>` : ""}
+                      <tr>
+                        <td style="color:#999;font-size:14px;border-top:1px solid #2a2a2a;padding-top:8px;">Эцсийн нийт дүн</td>
+                        <td style="color:#f43f5e;font-size:18px;font-weight:700;text-align:right;border-top:1px solid #2a2a2a;padding-top:8px;">${fmt(totalAmount)}</td>
                       </tr>
                     </table>
                   </td>
