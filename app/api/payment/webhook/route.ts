@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { orderConfirmationHtml } from "@/lib/emails/orderConfirmation"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const getResend = () => new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    const emailResult = await resend.emails.send({
+    const emailResult = await getResend().emails.send({
       from:    "FATE <onboarding@resend.dev>",
       to:      toEmail,
       subject: `Захиалга баталгаажлаа #${orderId.slice(-8).toUpperCase()}`,
