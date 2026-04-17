@@ -62,7 +62,7 @@ export default function ProductCarousel({ title, products }: Props) {
 
         {/* Desktop link */}
         {screenSize === "desktop" && (
-          <Link href="/products" className="font-body text-gray-300 text-[14px] border-b border-current hover:text-white transition-colors">
+          <Link href="/products" className="font-body text-white/70 text-[14px] border-b border-current hover:text-white transition-colors">
             Бүгдийг харах
           </Link>
         )}
