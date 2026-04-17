@@ -4,28 +4,10 @@
 import { useWishlist } from "@/context/WishlistContext"
 import ProductCard from "@/components/ProductCard"
 import { HeartOff } from "lucide-react"
-import { Product } from "@/lib/api"
 
 export default function WishlistPage() {
   const { wishlist } = useWishlist()
   const isEmpty = wishlist.length === 0
-
-  // WishlistItem → Product format болгон хөрвүүл
-  const toProduct = (item: any): Product => ({
-    id:              item.id,
-    title:           item.title,
-    description:     "",
-    price:           Number(item.price) || 0,
-    finalPrice:      null,
-    discountEnabled: false,
-    discountEndsAt:  null,
-    sizes:           [],
-    colors:          [],
-    status:          "active",
-    createdAt:       item.createdAt ?? new Date().toISOString(),
-    images:          item.image ? [{ id: "0", url: item.image, isPrimary: true, order: 0 }] : [],
-    categories:      item.category ? [{ category: { id: "0", name: item.category, slug: "", parentId: null, children: [] } }] : [],
-  })
 
   return (
     <div className="max-w-7xl mx-auto mt-3">
@@ -43,7 +25,7 @@ export default function WishlistPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {wishlist.map((item, i) => (
-            <ProductCard key={i} product={toProduct(item)} />
+            <ProductCard key={i} product={item} />
           ))}
         </div>
       )}

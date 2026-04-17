@@ -35,14 +35,7 @@ export default function ProductCard({ product }: Props) {
     } else {
       showToast("❤️ Хүслийн жагсаалтад нэмэгдлээ")
     }
-    toggleWishlist({
-      id:        product.id as any,
-      title:     product.title,
-      image:     img?.url ?? "",
-      price:     String(price),
-      category:  product.categories[0]?.category.name ?? "",
-      createdAt: product.createdAt,
-    } as any)
+    toggleWishlist(product)
   }
 
   const handleAddToCart = () => { 

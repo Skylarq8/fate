@@ -13,8 +13,20 @@ export default function MobileNav() {
   const { wishlist } = useWishlist();
   const { items } = useCartStore();
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isProductDetail = /^\/products\/.+/.test(pathname);
+
+  // Барааны дэлгэрэнгүй хуудасны өмнөх top-level хуудсыг хадгална
+  const lastTopLevel = useRef(isProductDetail ? "/" : pathname);
+  useEffect(() => {
+    if (!isProductDetail) {
+      lastTopLevel.current = pathname;
+    }
+  }, [pathname, isProductDetail]);
+
+  const isActive = (href: string) => {
+    const activePath = isProductDetail ? lastTopLevel.current : pathname;
+    return href === "/" ? activePath === "/" : activePath.startsWith(href);
+  };
 
   const lastScrollY = useRef(0);
 
@@ -47,15 +59,15 @@ export default function MobileNav() {
       ${show ? "translate-y-0" : "translate-y-full"}`}
     >
       <div className="flex justify-around items-center h-16">
-        <Link href="/" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/") ? "text-rose-500" : "text-white/90"}`}>
+        <Link href="/" className={`flex flex-col items-center text-xs gap-0.5 transition-colors outline-none focus:outline-none ${isActive("/") ? "text-rose-500" : "text-white/90"}`}>
           <Home size={20} />
           Нүүр
         </Link>
-        <Link href="/products" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/products") ? "text-rose-500" : "text-white/90"}`}>
+        <Link href="/products" className={`flex flex-col items-center text-xs gap-0.5 transition-colors outline-none focus:outline-none ${isActive("/products") ? "text-rose-500" : "text-white/90"}`}>
           <Package size={20} />
           Бүх бараа
         </Link>
-        <Link href="/wishlist" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/wishlist") ? "text-rose-500" : "text-white/90"}`}>
+        <Link href="/wishlist" className={`flex flex-col items-center text-xs gap-0.5 transition-colors outline-none focus:outline-none ${isActive("/wishlist") ? "text-rose-500" : "text-white/90"}`}>
           <span className="relative">
             <Heart size={20} />
             {wishlist.length > 0 && (
@@ -66,7 +78,7 @@ export default function MobileNav() {
           </span>
           Таалагдсан
         </Link>
-        <Link href="/cart" className={`flex flex-col items-center text-xs gap-0.5 transition-colors ${isActive("/cart") ? "text-rose-500" : "text-white/90"}`}>
+        <Link href="/cart" className={`flex flex-col items-center text-xs gap-0.5 transition-colors outline-none focus:outline-none ${isActive("/cart") ? "text-rose-500" : "text-white/90"}`}>
           <span className="relative">
             <ShoppingCart size={20} />
             {items.length > 0 && (
