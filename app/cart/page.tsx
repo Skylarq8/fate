@@ -94,14 +94,6 @@ export default function CartPage() {
 
   const finalTotal = Math.max(subtotal + shipping - discountAmount, 0)
   const displaySubtotal = subtotal
-  console.log({
-    baseTotal,
-    productDiscount,
-    subtotal,
-    discountAmount,
-    shipping,
-    finalTotal,
-  })
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return
