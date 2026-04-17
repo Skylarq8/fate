@@ -49,7 +49,7 @@ export function orderConfirmationHtml({
   return `<!DOCTYPE html>
 <html lang="mn">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#black;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
     <tr>
       <td align="center">
@@ -58,9 +58,9 @@ export function orderConfirmationHtml({
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#be123c,#9f1239);padding:36px 32px;text-align:center;">
-              <p style="margin:0 0 10px;color:#fff;font-size:28px;font-weight:900;letter-spacing:8px;text-transform:uppercase;">FATE</p>
-              <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">Захиалга баталгаажлаа</h1>
-              <p style="margin:10px 0 0;color:#fff;font-size:13px;opacity:0.9;">#${shortId}</p>
+              <p style="margin:0 0 10px;color:#white;font-size:28px;font-weight:900;letter-spacing:8px;text-transform:uppercase;">FATE</p>
+              <h1 style="margin:0;color:#white;font-size:22px;font-weight:700;">Захиалга баталгаажлаа</h1>
+              <p style="margin:10px 0 0;color:#white;font-size:13px;opacity:0.9;">#${shortId}</p>
             </td>
           </tr>
 
