@@ -31,7 +31,6 @@ export const metadata: Metadata = {
   title: "FATE",
   description: "FATE",
   manifest: "/manifest.json",
-  themeColor: "#000000",
 };
 
 export const viewport: Viewport = {

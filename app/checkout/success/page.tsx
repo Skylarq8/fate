@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const clearCart   = useCartStore(s => s.clearCart)
   const searchParams = useSearchParams()
   const orderId      = searchParams.get("orderId")
@@ -72,5 +72,20 @@ export default function CheckoutSuccessPage() {
         Дэлгүүр хэсэх
       </Link>
     </div>
+  )
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-5">
+          <Loader2 className="w-10 h-10 text-white/50 animate-spin mb-4" />
+          <p className="text-white/50 text-sm">Ачааллаж байна...</p>
+        </div>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
   )
 }
