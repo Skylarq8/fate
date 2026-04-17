@@ -22,9 +22,8 @@ type SelectedVariants = Record<string, string>;
 export default function ProductDetailPage() {
   const { id }    = useParams<{ id: string }>()
   const productFromStore = useProductStore(s => s.selectedProduct)
-  const hasStoreMatch = !!productFromStore && productFromStore.id === id
-  const [product, setProduct] = useState<Product | null>(hasStoreMatch ? productFromStore : null)
-  const [loading, setLoading] = useState(!hasStoreMatch)
+  const [product, setProduct] = useState<Product | null>(productFromStore)
+  const [loading, setLoading] = useState(!productFromStore)
   const addItem   = useCartStore(s => s.addItem)
   const { toggleWishlist, isInWishlist } = useWishlist()
   const { showToast } = useToast()
@@ -78,12 +77,21 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!id) return
-    if (hasStoreMatch) return
+
+    // store байгаа эсэхийг шалгана
+    if (productFromStore && productFromStore.id === id) {
+      setProduct(productFromStore)
+      setLoading(false)
+      return
+    }
+
+    // үгүй бол fetch
+    setLoading(true)
 
     getProduct(id)
       .then(p => setProduct(p))
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, productFromStore])
 
   useEffect(() => {
     if (!product) return
