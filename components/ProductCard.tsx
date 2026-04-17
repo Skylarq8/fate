@@ -9,7 +9,7 @@ import { useWishlist } from "@/context/WishlistContext"
 import { useToast } from "@/context/ToastContext"
 import { useCartStore } from "@/store/cartStore"
 import { useProductStore } from "@/store/productStore"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import AddToCartSheet from "./AddToCartSheet"
 
 interface Props {
@@ -22,6 +22,24 @@ export default function ProductCard({ product }: Props) {
   const { showToast }                    = useToast()
   const addItem                          = useCartStore(s => s.addItem)
   const [showSheet, setShowSheet] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0, rootMargin: "0px 0px 120px 0px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const liked = isInWishlist(product.id as any)
   const img   = primaryImage(product)
@@ -59,6 +77,10 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <>
+      <div
+        ref={cardRef}
+        className={`transition-all duration-800 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+      >
       <Link href={`/products/${product.id}`} onClick={() => setSelectedProduct(product)} className="group block">
       {/* bg-white/10 backdrop-blur-md */}
         <div className="rounded-2xl border border-white/20 transition hover:shadow-lg hover:bg-white/20">
@@ -69,7 +91,7 @@ export default function ProductCard({ product }: Props) {
                 src={img.url}
                 alt={product.title}
                 fill
-                className="object-cover transition duration-300 group-hover:scale-105"
+                className="object-cover transition duration-500 group-hover:scale-105"
               />
             ) : (
               <div className="w-full h-full bg-white/5 rounded-xl"
@@ -110,6 +132,7 @@ export default function ProductCard({ product }: Props) {
           </div>
         </div>
       </Link>
+      </div>
         {showSheet && (
           <AddToCartSheet
             product={product}

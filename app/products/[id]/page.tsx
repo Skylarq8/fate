@@ -39,6 +39,12 @@ export default function ProductDetailPage() {
   const [qty,       setQty]       = useState(1)
   const [touchStartX, setTouchStartX] = useState(0);
   const [added,     setAdded]     = useState(false)
+  const [mounted,   setMounted]   = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 50)
+    return () => clearTimeout(t)
+  }, [])
   const [animProgress, setAnimProgress] = useState(0)
   const [remainingTime, setRemainingTime] = useState<{
     days: number
@@ -272,7 +278,7 @@ export default function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-5">
 
         {/* Images */}
-        <div className="space-y-3">
+        <div className={`space-y-3 transition-all duration-500 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-14"}`}>
           <div className="relative aspect-square rounded-3xl overflow-hidden glass" 
           onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
           onTouchEnd={(e) => {
@@ -322,7 +328,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Info */}
-        <div className="space-y-5 md:pt-2">
+        <div className={`space-y-5 md:pt-2 transition-all duration-500 ease-out delay-150 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-14"}`}>
           <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
             {product.title}
           </h1>

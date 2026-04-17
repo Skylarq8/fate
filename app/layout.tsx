@@ -6,8 +6,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import Galaxy from "@/components/Galaxy";
 import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/context/ToastContext";
-import Accordin from "@/components/Accordin";
-import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -30,7 +29,6 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "FATE",
   description: "FATE",
-  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
@@ -61,6 +59,7 @@ export default function RootLayout({
                       starSpeed={0.5}
                       speed={1}/>
               </div>
+              <ScrollToTop />
               <ToastProvider>
                 <WishlistProvider>
                   <HeroHeader />

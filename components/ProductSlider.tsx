@@ -2,10 +2,26 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect() } },
+      { threshold: 0, rootMargin: "0px 0px 120px 0px" }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+  return { ref, visible }
+}
 import { Swiper, SwiperSlide } from "swiper/react"
 import { FreeMode } from "swiper/modules"
 import "swiper/css"
-import { getProducts, Product } from "@/lib/api"
+import { Product } from "@/lib/api"
 import ProductCard from "./ProductCard"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
@@ -19,7 +35,9 @@ interface Props {
 export default function ProductCarousel({ title, products }: Props) {
   const [loading,    setLoading]    = useState(true)
   const [screenSize, setScreenSize] = useState<"mobile" | "tablet" | "desktop">("mobile");
-  const swiperRef = useRef<any>(null)
+  const swiperRef   = useRef<any>(null)
+  const titleReveal = useReveal()
+  const [buttonVisible, setButtonVisible] = useState(false)
 
   useEffect(() => {
     const handleResize = () => {
@@ -28,7 +46,10 @@ export default function ProductCarousel({ title, products }: Props) {
       else if (width >= 768) setScreenSize("tablet")
       else setScreenSize("mobile")
     }
-    if (products.length > 0) setLoading(false)
+    if (products.length > 0) {
+      setLoading(false)
+      setTimeout(() => setButtonVisible(true), 100)
+    }
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
@@ -37,7 +58,7 @@ export default function ProductCarousel({ title, products }: Props) {
   return (
     <div className="mt-3 md:mt-7 lg:mt-9">
       {/* Title row */}
-      <div className="flex mb-4 sm:mb-6 justify-between items-center">
+      <div ref={titleReveal.ref} className={`flex mb-4 sm:mb-6 justify-between items-center transition-all duration-800 ease-out ${titleReveal.visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}>
         <h1 className="text-white/90 text-[23px] sm:text-3xl font-head font-bold">
           {title}
         </h1>
@@ -119,11 +140,13 @@ export default function ProductCarousel({ title, products }: Props) {
 
       {/* Mobile "Бүгдийг харах" */}
       {!loading && screenSize !== "desktop" && (
-        <div className="my-4 w-full bg-white/10 flex justify-center items-center py-1.5 border border-white/20 rounded-xl">
+        <div className="my-4">
+        <div className={`w-full bg-white/10 flex justify-center items-center py-1.5 border border-white/20 rounded-xl transition-all duration-800 ease-out ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}>
           <Link href="/products" className="flex items-center gap-1 px-6 py-1 text-sm font-medium text-white/90">
             Бүгдийг харах
             <ChevronRight size={16} className="mt-0.5 text-white/90" />
           </Link>
+        </div>
         </div>
       )}
     </div>
