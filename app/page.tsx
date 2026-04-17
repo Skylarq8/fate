@@ -4,7 +4,7 @@ import HeroSlider from "@/components/HeroSlider";
 import ProductSlider from "@/components/ProductSlider";
 import { getProducts, Product } from "@/lib/api";
 
-export const revalidate = 60
+export const revalidate = 0
 
 export default async function Home() {
   const allProducts = await getProducts()
@@ -12,14 +12,18 @@ export default async function Home() {
   const discount = allProducts.filter(
     (p: Product) => p.discountEnabled && p.finalPrice
   )
-  const newArrivals = [...allProducts].sort(
-    (a: Product, b: Product) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-  const all = [...allProducts].sort(
-    (a: Product, b: Product) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  )
+  const newArrivals = allProducts
+    .filter((p: Product) => !(p.discountEnabled && p.finalPrice))
+    .sort(
+      (a: Product, b: Product) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  const all = allProducts
+    .filter((p: Product) => !(p.discountEnabled && p.finalPrice))
+    .sort(
+      (a: Product, b: Product) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
 
   return (
     <div>

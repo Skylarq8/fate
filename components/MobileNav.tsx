@@ -9,9 +9,12 @@ import { useCartStore } from "@/store/cartStore";
 
 export default function MobileNav() {
   const [show, setShow] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { wishlist } = useWishlist();
   const { items } = useCartStore();
+
+  useEffect(() => { setMounted(true) }, []);
 
   const isProductDetail = /^\/products\/.+/.test(pathname);
 
@@ -24,6 +27,7 @@ export default function MobileNav() {
   }, [pathname, isProductDetail]);
 
   const isActive = (href: string) => {
+    if (!mounted) return false;
     const activePath = isProductDetail ? lastTopLevel.current : pathname;
     return href === "/" ? activePath === "/" : activePath.startsWith(href);
   };

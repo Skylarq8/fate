@@ -1,7 +1,7 @@
 import { getProducts, getCategories, Product } from "@/lib/api"
 import ProductsClient from "@/components/ProductsClient"
 
-export const revalidate = 60
+export const revalidate = 0
 
 const PAGE_SIZE = 24
 
