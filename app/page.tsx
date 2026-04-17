@@ -4,7 +4,7 @@ import HeroSlider from "@/components/HeroSlider";
 import ProductSlider from "@/components/ProductSlider";
 import { getProducts, Product } from "@/lib/api";
 
-export const revalidate = 0
+export const revalidate = 60
 
 export default async function Home() {
   const allProducts = await getProducts()

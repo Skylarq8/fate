@@ -1,11 +1,12 @@
 // 📁 lib/api.ts
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
+// Uses Next.js Data Cache — persists across cold starts and all Lambda instances
 async function cachedFetch(url: string, options?: RequestInit) {
   const res = await fetch(url, {
     ...options,
-    cache: "no-store",
-  })
+    next: { revalidate: 60 },
+  } as RequestInit & { next: { revalidate: number } })
   return res.json()
 }
 
