@@ -394,8 +394,10 @@ export default function CheckoutPage() {
           phone,
           email,
           shippingAddress,
-          totalAmount: finalTotal,
-          couponCode:  couponData?.code,
+          totalAmount:     finalTotal,
+          shippingAmount:  shipping,
+          couponDiscount,
+          couponCode:      couponData?.code,
           items: items.map(i => ({
             productId: i.productId,
             quantity:  i.quantity,

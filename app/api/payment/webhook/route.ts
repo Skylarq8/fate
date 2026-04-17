@@ -67,11 +67,9 @@ export async function POST(req: NextRequest) {
       color:     item.color || undefined,
     }))
 
-    // Хүргэлт тооцох (items нийлбэрээс)
-    const itemsSubtotal = toItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0)
-    const shipping      = itemsSubtotal >= 100000 ? 0 : 5000
-    // Coupon хөнгөлөлт = items нийлбэр + хүргэлт - эцсийн дүн
-    const couponDiscount = Math.max(0, itemsSubtotal + shipping - toTotal)
+    // Хүргэлт, coupon — backend-аас авна, эс бөгөөс 0
+    const shipping       = Number(order?.shippingAmount ?? order?.shipping ?? order?.shippingFee ?? 0)
+    const couponDiscount = Number(order?.couponDiscount ?? order?.discountAmount ?? order?.coupon?.discount ?? 0)
 
     if (!toEmail) {
       console.error("❌ No email found — payload:", emailFromPayload, "order:", order?.email)
