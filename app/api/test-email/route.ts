@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await resend.emails.send({
-    from: "FATE <onboarding@resend.dev>",
+    from: "FATE <noreply@fate.mn>",
     to,
     subject: "Test — Захиалга баталгаажлаа #TEST123",
     html: orderConfirmationHtml({

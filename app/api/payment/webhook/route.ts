@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     const emailResult = await getResend().emails.send({
-      from:    "FATE <onboarding@resend.dev>",
+      from:    "FATE <noreply@fate.mn>",
       to:      toEmail,
       subject: `Захиалга баталгаажлаа #${orderId.slice(-8).toUpperCase()}`,
       html:    orderConfirmationHtml({

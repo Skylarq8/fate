@@ -3,12 +3,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPin, ShoppingBag, CheckCircle, X, Home, Building2, Briefcase, ShoppingCart } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPin, X, Home, Building2, Briefcase, ShoppingCart, Wallet2 } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
+import { useToast } from "@/context/ToastContext"
 import { fmt } from "@/lib/api"
 import { CITIES, getDistricts, getKhoroos } from "@/lib/data/location"
 
-type Step = "info" | "payment" | "success"
 type AddressType = "apartment" | "house" | "office"
 
 // ── Address Bottom Sheet ─────────────────────────────────────────────────
@@ -45,7 +45,7 @@ function AddressSheet({ open, onClose, onSave }: {
     if (!khoroo)   e.khoroo   = "Хороо сонгоно уу"
  
     if (type === "apartment") {
-      if (!building.trim()) e.building = "Байрны дугаар оруулна уу"
+      if (!building.trim()) e.building = "Байрны нэр, дугаар оруулна уу"
       if (!door.trim())     e.door     = "Тоот оруулна уу"
     } else if (type === "house") {
       if (!houseNum.trim())  e.houseNum  = "Байшингийн дугаар оруулна уу"
@@ -205,7 +205,7 @@ function AddressSheet({ open, onClose, onSave }: {
                 <input
                   value={building}
                   onChange={e => { setBuilding(e.target.value); setErrors(p => ({ ...p, building: "" })) }}
-                  placeholder="Байрны дугаар"
+                  placeholder="Байрны нэр, дугаар"
                   className={inputClass("building")}
                 />
                 {errors.building && <p className="text-xs text-red-400">{errors.building}</p>}
@@ -325,48 +325,41 @@ function AddressSheet({ open, onClose, onSave }: {
 
 // ── Main Page ────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart, coupon } = useCartStore()
-  const [step, setStep] = useState<Step>("info")
+  const { items, totalPrice, coupon } = useCartStore()
+  const { showToast } = useToast()
 
   const couponData = typeof window !== "undefined"
     ? JSON.parse(sessionStorage.getItem("coupon") || "null")
     : null
 
-  const [loading, setLoading] = useState(false)
+  const [loading,          setLoading]          = useState(false)
   const [addressSheetOpen, setAddressSheetOpen] = useState(false)
+  const [customerName,     setCustomerName]     = useState("")
+  const [phone,            setPhone]            = useState("")
+  const [email,            setEmail]            = useState("")
+  const [shippingAddress,  setShippingAddress]  = useState("")
+  const [errors,           setErrors]           = useState<Record<string, string>>({})
 
-  const [customerName,    setCustomerName]    = useState("")
-  const [phone,           setPhone]           = useState("")
-  const [email,           setEmail]           = useState("")
-  const [shippingAddress, setShippingAddress] = useState("")
-  const [errors,          setErrors]          = useState<Record<string, string>>({})
-
-  const shipping        = totalPrice() >= 100000 ? 0 : 5000
-    const baseTotal = items.reduce((sum, item) => {
-    return sum + item.price * item.quantity
-  }, 0)
-
+  const baseTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const productDiscount = items.reduce((sum, item) => {
-    if (item.discountEnabled && item.finalPrice) {
+    if (item.discountEnabled && item.finalPrice)
       return sum + (item.price - item.finalPrice) * item.quantity
-    }
     return sum
   }, 0)
-  const subtotal        = baseTotal - productDiscount
+  const subtotal = baseTotal - productDiscount
+  const shipping = subtotal >= 100000 ? 0 : 5000
 
   const couponDiscount = (() => {
     if (!couponData && !coupon) return 0
     const c = couponData || coupon
-    if (c.type === "percentage" && c.discountPercent) {
+    if (c.type === "percentage" && c.discountPercent)
       return Math.round(subtotal * (c.discountPercent / 100))
-    }
-    if (c.type === "amount" && c.discountAmount) {
+    if (c.type === "amount" && c.discountAmount)
       return Math.min(c.discountAmount, subtotal)
-    }
     return 0
   })()
 
-  const finalTotal      = subtotal + shipping - couponDiscount
+  const finalTotal = subtotal + shipping - couponDiscount
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -383,9 +376,9 @@ export default function CheckoutPage() {
   }
 
   const handleSubmitOrder = async () => {
+    if (!validate()) return
     setLoading(true)
     try {
-      // 1️⃣ Эхлээд order үүсгэнэ
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -394,42 +387,34 @@ export default function CheckoutPage() {
           phone,
           email,
           shippingAddress,
-          totalAmount:     finalTotal,
-          shippingAmount:  shipping,
+          totalAmount:    finalTotal,
+          shippingAmount: shipping,
           couponDiscount,
-          couponCode:      couponData?.code,
+          couponCode:     couponData?.code,
           items: items.map(i => ({
             productId: i.productId,
             quantity:  i.quantity,
             size:      i.size,
             color:     i.color,
-            variants: i.variants.map(v => ({ [v.label]: v.value })),
+            variants:  i.variants.map(v => ({ [v.label]: v.value })),
             unitPrice: i.price,
           })),
         }),
       })
 
       if (!res.ok) throw new Error("Order failed")
-      const order = await res.json()
+      const order   = await res.json()
       const orderId = order.data.id
 
-      // 2️⃣ byl.mn checkout үүсгэнэ
       const bylRes = await fetch("/api/payment/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          finalTotal,
-          email,
-          customerName
-        }),
+        body: JSON.stringify({ orderId, finalTotal, email, customerName }),
       })
 
       const bylData = await bylRes.json()
       if (!bylData.url) throw new Error("Checkout creation failed")
 
-      // 3️⃣ byl.mn checkout page руу redirect
-      clearCart()
       window.location.href = bylData.url
 
     } catch (err) {
@@ -449,8 +434,7 @@ export default function CheckoutPage() {
         <h2 className="font-display text-2xl font-bold text-white/90">Сагс хоосон байна</h2>
         <p className="text-white/40 text-sm">Бараа нэмэхийн тулд дэлгүүр хэсье</p>
       </div>
-      <Link href="/products"
-        className="inline-flex items-center gap-2 font-semibold px-7 py-2.5 rounded-full bg-rose-500 text-white/90 text-sm">
+      <Link href="/products" className="inline-flex items-center gap-2 font-semibold px-7 py-2.5 rounded-full bg-rose-500 text-white/90 text-sm">
         🛒 Дэлгүүр хэсэх
       </Link>
     </div>
@@ -467,143 +451,79 @@ export default function CheckoutPage() {
         }}
       />
 
-      <div className="max-w-6xl mx-auto pt-3 pb-8 fade-up">
+      <div className="max-w-6xl mx-auto pt-3 pb-24 md:pb-8 fade-up">
 
-        {/* Back */}
         <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors mb-6">
           <ChevronLeft size={15} /> Сагс руу буцах
         </Link>
 
-        {/* Steps */}
-        <div className="flex items-center gap-3 mb-5">
-          {(["info", "payment"] as Step[]).map((s, i) => (
-            <div key={s} className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                step === s ? "text-white" : step === "payment" && s === "info" ? "text-white/40" : "text-white/30"
-              }`}>
-                <span className={`w-7 h-7 flex items-center justify-center text-xs font-bold border transition-all ${
-                  step === s
-                    ? "border-rose-500 bg-rose-400/20 text-rose-400"
-                    : step === "payment" && s === "info"
-                      ? "border-white/20 bg-white/10 text-white/40"
-                      : "border-white/10 text-white/20"
-                }`} style={{ borderRadius: "9999px" }}>
-                  {step === "payment" && s === "info" ? "✓" : i + 1}
-                </span>
-                {s === "info" ? "Мэдээлэл" : "Төлбөр"}
-              </div>
-              {i === 0 && <ChevronRight size={14} className="text-white/20" />}
-            </div>
-          ))}
-        </div>
-
         <div className="grid md:grid-cols-5 gap-5 gap-x-10">
 
-          {/* Left */}
+          {/* Left — form */}
           <div className="md:col-span-3">
+            <div className="glass rounded-2xl space-y-5">
+              <h2 className="font-display text-xl font-bold text-white">Захиалагчийн мэдээлэл</h2>
 
-            {/* Step 1: Info */}
-            {step === "info" && (
-              <div className="glass rounded-2xl space-y-5 fade-up">
-                <h2 className="font-display text-xl font-bold text-white">Захиалагчийн мэдээлэл</h2>
-
-                {/* Name, Phone, Email */}
-                {[
-                  { icon: <User size={16} />,  label: "Нэр",           val: customerName, set: setCustomerName, key: "customerName", ph: "Нэрээ оруулна уу!" },
-                  { icon: <Phone size={16} />, label: "Утасны дугаар", val: phone,        set: setPhone,        key: "phone",        ph: "Утасны дугаараа оруулна уу!" },
-                  { icon: <Mail size={16} />,  label: "И-мэйл",        val: email,        set: setEmail,        key: "email",        ph: "И-мэйл хаягаа оруулна уу!" },
-                ].map(f => (
-                  <div key={f.key} className="space-y-2">
-                    <label className="text-xs text-white/90 uppercase flex items-center gap-1.5">
-                      <span className="text-white/90">{f.icon}</span>{f.label}
-                    </label>
-                    <input
-                      value={f.val}
-                      onChange={e => { f.set(e.target.value); setErrors(p => ({ ...p, [f.key]: "" })) }}
-                      placeholder={f.ph}
-                      className={`w-full glass-sm text-base rounded-xl px-4 py-3 text-white placeholder-white/50 outline-none bg-transparent border transition-colors ${
-                        errors[f.key] ? "border-red-500/50" : "border-white/25 focus:border-rose-500/50"
-                      }`}
-                    />
-                    {errors[f.key] && <p className="text-xs text-red-400">{errors[f.key]}</p>}
-                  </div>
-                ))}
-
-                {/* Shipping Address */}
-                <div className="space-y-2">
-                  <label className="text-xs text-white/90 uppercase flex items-center gap-1.5">
-                    <MapPin size={16} className="text-white/90" /> Хүргэлтийн хаяг
+              {[
+                { icon: <User size={16} />,  label: "Нэр",           val: customerName, set: setCustomerName, key: "customerName", ph: "Нэрээ оруулна уу" },
+                { icon: <Phone size={16} />, label: "Утасны дугаар", val: phone,        set: setPhone,        key: "phone",        ph: "Утасны дугаараа оруулна уу" },
+                { icon: <Mail size={16} />,  label: "И-мэйл",        val: email,        set: setEmail,        key: "email",        ph: "И-мэйл хаягаа оруулна уу" },
+              ].map(f => (
+                <div key={f.key} className="space-y-2">
+                  <label className="text-xs text-white/90 uppercase tracking-wide flex items-center gap-1.5">
+                    <span className="text-white/90">{f.icon}</span>{f.label}
                   </label>
-
-                  {shippingAddress ? (
-                    <div className="glass-sm rounded-xl px-4 py-3 border border-white/25 flex items-start justify-between gap-3">
-                      <p className="text-white text-sm leading-relaxed flex-1">{shippingAddress}</p>
-                      <button
-                        onClick={() => setAddressSheetOpen(true)}
-                        className="text-xs text-white/40 hover:text-white underline flex-shrink-0 transition-colors"
-                      >
-                        Засах
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setAddressSheetOpen(true)}
-                      className={`w-full glass-sm rounded-xl px-4 py-3 text-left text-white/40 border transition-colors hover:border-rose-500/50 hover:text-white/60 ${
-                        errors.shippingAddress ? "border-red-500/50" : "border-white/25"
-                      }`}
-                    >
-                      + Хүргэлтийн хаяг оруулах
-                    </button>
-                  )}
-                  {errors.shippingAddress && <p className="text-xs text-red-400">{errors.shippingAddress}</p>}
+                  <input
+                    value={f.val}
+                    onChange={e => { f.set(e.target.value); setErrors(p => ({ ...p, [f.key]: "" })) }}
+                    placeholder={f.ph}
+                    className={`w-full glass-sm text-base rounded-xl px-4 py-3 text-white placeholder-white/40 hover:border-rose-500/50 outline-none bg-transparent border transition-colors ${
+                      errors[f.key] ? "border-red-500/50" : "border-white/25 focus:border-rose-500/50"
+                    }`}
+                  />
+                  {errors[f.key] && <p className="text-xs text-red-400">{errors[f.key]}</p>}
                 </div>
+              ))}
 
-                <button
-                  onClick={() => { if (validate()) setStep("payment") }}
-                  className="w-full py-3.5 bg-rose-500 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-98">
-                  Үргэлжлүүлэх <ChevronRight size={16} />
-                </button>
-              </div>
-            )}
-
-            {/* Step 2: Payment */}
-            {step === "payment" && (
-              <div className="space-y-4 fade-up">
-                <div className="glass rounded-2xl py-5 -mt-5 space-y-5">
-                  <div className="flex items-center pb-3 justify-between">
-                    <h2 className="font-display text-xl font-bold text-white">Захиалагчийн мэдээлэл</h2>
-                    <button onClick={() => setStep("info")} className="text-[14px] text-white/50 underline hover:text-white transition-colors">
+              {/* Хүргэлтийн хаяг */}
+              <div className="space-y-2">
+                <label className="text-xs text-white/90 uppercase tracking-wide flex items-center gap-1.5">
+                  <MapPin size={16} className="text-white/90" /> Хүргэлтийн хаяг
+                </label>
+                {shippingAddress ? (
+                  <div className="glass-sm rounded-xl px-4 py-3 border border-white/25 flex items-start justify-between gap-3">
+                    <p className="text-white text-sm leading-relaxed flex-1">{shippingAddress}</p>
+                    <button onClick={() => setAddressSheetOpen(true)} className="text-xs text-white/40 hover:text-white underline flex-shrink-0 transition-colors">
                       Засах
                     </button>
                   </div>
-                  {[
-                    { icon: <User size={16} />,   val: customerName    },
-                    { icon: <Phone size={16} />,  val: phone           },
-                    { icon: <Mail size={16} />,   val: email           },
-                    { icon: <MapPin size={16} />, val: shippingAddress },
-                  ].map((r, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-[15px] text-white/90">
-                      <span className="flex-shrink-0 text-white mt-0.5">{r.icon}</span>
-                      <span className="break-words">{r.val}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleSubmitOrder}
-                  disabled={loading}
-                  className="w-full py-4 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-98 disabled:opacity-60 bg-rose-500">
-                  {loading
-                    ? <span className="w-5 h-5 border-2 border-white/30 border-t-white" style={{ borderRadius: "9999px", animation: "spin 0.8s linear infinite" }} />
-                    : <><CheckCircle size={17} /> Захиалга баталгаажуулах</>
-                  }
-                </button>
-                <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+                ) : (
+                  <button
+                    onClick={() => setAddressSheetOpen(true)}
+                    className={`w-full glass-sm rounded-xl px-4 py-3 text-left text-white/40 border transition-colors hover:border-rose-500/50 hover:text-white/60 ${
+                      errors.shippingAddress ? "border-red-500/50" : "border-white/25"
+                    }`}
+                  >
+                    + Хүргэлтийн хаяг оруулах
+                  </button>
+                )}
+                {errors.shippingAddress && <p className="text-xs text-red-400">{errors.shippingAddress}</p>}
               </div>
-            )}
+
+              <button
+                onClick={handleSubmitOrder}
+                disabled={loading}
+                className="w-full py-4 bg-rose-500 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+              >
+                {loading
+                  ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <><Wallet2 size={16} /> Төлбөр төлөх</>
+                }
+              </button>
+            </div>
           </div>
 
-          {/* Right: order summary */}
+          {/* Right — order summary */}
           <div className="md:col-span-2">
             <div className="glass rounded-2xl py-2 space-y-4 sticky top-24">
               <h3 className="font-display font-bold text-white text-xl pb-2">Захиалгын дэлгэрэнгүй</h3>
@@ -623,9 +543,7 @@ export default function CheckoutPage() {
                           {item.size  && <span className="text-white/50 text-[14px]">{item.size}</span>}
                           {item.color && <span className="text-white/50 text-[14px] uppercase">{item.color}</span>}
                           {item.variants && item.variants.map((v, idx) => (
-                            <span key={idx} className=" text-white/50 text-[14px] uppercase">
-                              {v.value}
-                            </span>
+                            <span key={idx} className="text-white/50 text-[14px] uppercase">{v.value}</span>
                           ))}
                           <span className="text-white/50 text-[14px]">· {item.quantity}ш</span>
                         </div>
@@ -633,8 +551,8 @@ export default function CheckoutPage() {
                       <div className="flex flex-col items-start">
                         <span className="text-white text-lg font-semibold flex-shrink-0">{fmt(item.discountEnabled && item.finalPrice ? item.finalPrice : item.price)}</span>
                         {item.discountEnabled && item.finalPrice && (
-                        <p className="text-rose-500 line-through text-[14px] mt-0.5">{fmt(item.price)}</p>
-                      )}
+                          <p className="text-rose-500 line-through text-[14px] mt-0.5">{fmt(item.price)}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -668,12 +586,9 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </>
   )
-}
-
-function showToast(arg0: string) {
-  throw new Error("Function not implemented.")
 }

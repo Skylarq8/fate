@@ -2,7 +2,7 @@
 "use client"
 
 import Link from "next/link"
-import { Minus, Plus, Trash2, ShoppingCart, Tag, X } from "lucide-react"
+import { Minus, Plus, Trash2, ShoppingCart, Tag, X, ChevronRight } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 import type { CartItem, CouponState } from "@/store/cartStore"
 import { fmt } from "@/lib/api"
@@ -336,8 +336,8 @@ export default function CartPage() {
             </div>
             <Link href={'/checkout'}>
               <button
-                className="w-full py-3.5 rounded-2xl font-semibold bg-rose-500 text-sm transition-all hover:scale-[1.02] active:scale-98">
-                Захиалах
+                className="w-full py-3.5 rounded-2xl font-semibold bg-rose-500 text-sm transition-all hover:scale-[1.02] active:scale-98 flex items-center justify-center gap-1.5">
+                Захиалах <ChevronRight size={16} />
               </button>
             </Link>
           </div>

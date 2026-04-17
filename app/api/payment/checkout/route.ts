@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         customer_email: email,
-        success_url: `${process.env.NEXT_PUBLIC_URL}/checkout/success`,
+        success_url: `${process.env.NEXT_PUBLIC_URL}/checkout/success?orderId=${orderId}`,
         cancel_url:  `${process.env.NEXT_PUBLIC_URL}/checkout`,
         client_reference_id: orderId,
         items: [
