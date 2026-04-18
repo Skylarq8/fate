@@ -1,7 +1,14 @@
-// 📁 components/ui/ProductCarousel.tsx
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { Swiper, SwiperSlide } from "swiper/react"
+import { FreeMode } from "swiper/modules"
+import type { Swiper as SwiperType } from "swiper"
+import "swiper/css"
+import { Product } from "@/lib/api"
+import ProductCard from "./ProductCard"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null)
@@ -18,108 +25,108 @@ function useReveal() {
   }, [])
   return { ref, visible }
 }
-import { Swiper, SwiperSlide } from "swiper/react"
-import { FreeMode } from "swiper/modules"
-import "swiper/css"
-import { Product } from "@/lib/api"
-import ProductCard from "./ProductCard"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import Link from "next/link"
 
 interface Props {
   title: string
-  // filter?: "featured" | "newest" | "all"
   products: Product[]
 }
 
-export default function ProductCarousel({ title, products }: Props) {
-  const [loading,    setLoading]    = useState(true)
-  const [screenSize, setScreenSize] = useState<"mobile" | "tablet" | "desktop">("mobile");
-  const swiperRef   = useRef<any>(null)
+export default function ProductSlider({ title, products }: Props) {
+  const swiperRef   = useRef<SwiperType | null>(null)
   const titleReveal = useReveal()
-  const [buttonVisible, setButtonVisible] = useState(false)
+  const [isBeginning, setIsBeginning] = useState(true)
+  const [isEnd,       setIsEnd]       = useState(false)
+
+  const storageKey = `slider-pos:${title}`
+
+  const syncState = (s: SwiperType) => {
+    setIsBeginning(s.isBeginning)
+    setIsEnd(s.isEnd)
+  }
+
+  const savePosition = (s: SwiperType) => {
+    syncState(s)
+    sessionStorage.setItem(storageKey, String(s.activeIndex))
+  }
 
   useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth
-      if (width >= 1024) setScreenSize("desktop")
-      else if (width >= 768) setScreenSize("tablet")
-      else setScreenSize("mobile")
+    const saved = sessionStorage.getItem(storageKey)
+    if (!saved) return
+    const index = parseInt(saved)
+    if (index > 0) {
+      swiperRef.current?.slideTo(index, 0, false)
     }
-    if (products.length > 0) {
-      setLoading(false)
-      setTimeout(() => setButtonVisible(true), 100)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   return (
     <div className="mt-3 md:mt-7 lg:mt-9">
-      {/* Title row */}
-      <div ref={titleReveal.ref} className={`flex mb-4 sm:mb-6 justify-between items-center transition-all duration-800 ease-out ${titleReveal.visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}>
+
+      {/* ── Title row ── */}
+      <div
+        ref={titleReveal.ref}
+        className={`flex items-center justify-between mb-4 sm:mb-6
+          transition-all duration-700 ease-out
+          ${titleReveal.visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}
+      >
         <h1 className="text-white/90 text-[23px] sm:text-3xl font-head font-bold">
           {title}
         </h1>
 
-        {/* Mobile arrows */}
-        {screenSize !== "desktop" && (
-          <div className="flex space-x-2.5">
+        <div className="flex items-center gap-3">
+          {/* Nav товч — mobile/tablet л харагдана */}
+          <div className="flex gap-1.5 lg:hidden">
             <button
-              onClick={() => swiperRef.current?.swiper.slidePrev()}
-              className="bg-white/10 p-1.5 rounded-full border border-white/20 flex items-center justify-center"
+              onClick={() => swiperRef.current?.slidePrev()}
+              disabled={isBeginning}
+              className={`p-1.5 rounded-full border transition-all duration-200
+                ${isBeginning
+                  ? "border-white/8 text-white/15 cursor-not-allowed"
+                  : "border-white/20 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
+                }`}
             >
-              <ChevronLeft className="size-6 text-white/90" />
+              <ChevronLeft size={18} />
             </button>
             <button
-              onClick={() => swiperRef.current?.swiper.slideNext()}
-              className="bg-white/10 p-1.5 rounded-full border border-white/20 flex items-center justify-center"
+              onClick={() => swiperRef.current?.slideNext()}
+              disabled={isEnd}
+              className={`p-1.5 rounded-full border transition-all duration-200
+                ${isEnd
+                  ? "border-white/8 text-white/15 cursor-not-allowed"
+                  : "border-white/20 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
+                }`}
             >
-              <ChevronRight className="size-6 text-white/90" />
+              <ChevronRight size={18} />
             </button>
           </div>
-        )}
 
-        {/* Desktop link */}
-        {screenSize === "desktop" && (
-          <Link href="/products" className="font-body text-white/70 text-[14px] border-b border-current hover:text-white transition-colors">
+          <Link
+            href="/products"
+            className="hidden lg:flex items-center gap-1 text-[13px] text-white/40 hover:text-white/80 transition-colors"
+          >
             Бүгдийг харах
+            <ChevronRight size={13} className="mt-px" />
           </Link>
-        )}
+        </div>
       </div>
 
-      {/* Skeleton */}
-      {loading && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {Array.from({ length: screenSize === "mobile" ? 2 : screenSize === "tablet" ? 3 : 4 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-3">
-              <div className="aspect-square rounded-xl skeleton" />
-              <div className="h-3.5 rounded skeleton w-3/4" />
-              <div className="h-3.5 rounded skeleton w-1/2" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Mobile → Swiper */}
-      {!loading && screenSize !== "desktop" && (
+      {/* ── Mobile/Tablet: Swiper ── */}
+      <div className="lg:hidden">
         <Swiper
           modules={[FreeMode]}
-          ref={swiperRef}
-          slidesPerView={
-            screenSize === "mobile" ? 2 :
-            screenSize === "tablet" ? 3 :
-            4
-          }
-          slidesPerGroup={screenSize === "mobile" ? 2 : 3}
-          freeMode={true}
+          freeMode
           spaceBetween={7}
-          speed={650}
-          // breakpoints={{
-          //   300: { slidesPerView: 2 },
-          //   640: { slidesPerView: 3 },
-          // }}
+          speed={600}
+          slidesPerGroup={2}
+          onSwiper={(s) => { swiperRef.current = s; syncState(s) }}
+          onSlideChange={syncState}
+          onReachBeginning={syncState}
+          onReachEnd={syncState}
+          onTouchEnd={savePosition}
+          onTransitionEnd={savePosition}
+          breakpoints={{
+            0:   { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+          }}
         >
           {products.map(product => (
             <SwiperSlide key={product.id}>
@@ -127,28 +134,28 @@ export default function ProductCarousel({ title, products }: Props) {
             </SwiperSlide>
           ))}
         </Swiper>
-      )}
+      </div>
 
-      {/* Desktop → Grid */}
-      {!loading && screenSize === "desktop" && (
-        <div className="grid grid-cols-4 gap-4">
-          {products.slice(0, 4).map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+      {/* ── Desktop: static 4-column grid ── */}
+      <div className="hidden lg:grid grid-cols-4 gap-1.75">
+        {products.slice(0, 4).map(product => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
 
-      {/* Mobile "Бүгдийг харах" */}
-      {!loading && screenSize !== "desktop" && (
-        <div className="my-4">
-        <div className={`w-full bg-white/10 flex justify-center items-center py-1.5 border border-white/20 rounded-xl transition-all duration-800 ease-out ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}>
-          <Link href="/products" className="flex items-center gap-1 px-6 py-1 text-sm font-medium text-white/90">
-            Бүгдийг харах
-            <ChevronRight size={16} className="mt-0.5 text-white/90" />
-          </Link>
-        </div>
-        </div>
-      )}
+      {/* ── Mobile — бүгдийг харах ── */}
+      <div className="mt-4 lg:hidden">
+        <Link
+          href="/products"
+          className="flex items-center justify-center gap-1 w-full py-2.5 rounded-xl
+            border border-white/20 bg-white/10 text-sm text-white/80
+            hover:bg-white/15 hover:text-white transition-all"
+        >
+          Бүгдийг харах
+          <ChevronRight size={14} className="mt-px" />
+        </Link>
+      </div>
+
     </div>
   )
 }
