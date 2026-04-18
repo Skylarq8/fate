@@ -280,33 +280,32 @@ export default function ProductsClient({
         </aside>
 
         {/* ── Mobile drawer ── */}
-        {showFilter && (
-          <>
-            <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm md:hidden"
-              style={{ zIndex: 9998 }}
+        <div
+          className={`fixed inset-0 bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-300
+            ${showFilter ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+          style={{ zIndex: 9998 }}
+          onClick={() => setShowFilter(false)}
+        />
+        <div
+          className={`fixed top-0 right-0 h-full w-72 flex flex-col
+            bg-[#0a0a0a]/90 backdrop-blur-xl border-l border-white/10 md:hidden
+            transition-transform duration-300 ease-in-out
+            ${showFilter ? "translate-x-0" : "translate-x-full"}`}
+          style={{ zIndex: 9999 }}
+        >
+          <div className="flex items-center justify-between px-5 py-2 border-b border-white/10">
+            <p className="font-semibold text-white text-base tracking-tight">Filter</p>
+            <button
               onClick={() => setShowFilter(false)}
-            />
-            <div
-              className="fixed top-0 right-0 h-full w-72 flex flex-col
-                bg-[#0a0a0a]/90 backdrop-blur-xl border-l border-white/10 md:hidden"
-              style={{ zIndex: 9999 }}
+              className="text-white/50 hover:text-white transition-colors p-1 -mr-1"
             >
-              <div className="flex items-center justify-between px-5 py-2 border-b border-white/10">
-                <p className="font-semibold text-white text-base tracking-tight">Filter</p>
-                <button
-                  onClick={() => setShowFilter(false)}
-                  className="text-white/50 hover:text-white transition-colors p-1 -mr-1"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto px-2.5 py-5 mb-5">
-                <FilterContent />
-              </div>
-            </div>
-          </>
-        )}
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-2.5 py-5 mb-5">
+            <FilterContent />
+          </div>
+        </div>
 
         {/* ── Product grid ── */}
         <div className="flex-1 min-w-0 space-y-6">
