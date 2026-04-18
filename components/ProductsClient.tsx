@@ -157,9 +157,9 @@ export default function ProductsClient({
                 }
               `}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 py-1">
                 <span className={`
-                  flex-shrink-0 w-1.5 h-1.5 rounded-full transition-all
+                  shrink-0 w-1.5 h-1.5 rounded-full transition-all
                   ${activeCategory === "all" ? "bg-rose-500" : "bg-white/0 group-hover:bg-white/20"}
                 `} />
                 Бүгд

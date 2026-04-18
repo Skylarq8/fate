@@ -1,9 +1,23 @@
-import { getProducts, getCategories, Product } from "@/lib/api"
+import { getProducts, getCategories, Product, Category } from "@/lib/api"
 import ProductsClient from "@/components/ProductsClient"
 
 export const revalidate = 60
 
 const PAGE_SIZE = 24
+
+// Тухайн category болон бүх descendant-уудын slug-уудыг цуглуулна
+function collectSlugs(cat: Category): string[] {
+  return [cat.slug, ...(cat.children ?? []).flatMap(collectSlugs)]
+}
+
+function findCategory(cats: Category[], slug: string): Category | null {
+  for (const c of cats) {
+    if (c.slug === slug) return c
+    const found = findCategory(c.children ?? [], slug)
+    if (found) return found
+  }
+  return null
+}
 
 export default async function ProductsPage({
   searchParams,
@@ -19,13 +33,15 @@ export default async function ProductsPage({
     getCategories(),
   ])
 
-  // Filter
-  const filtered =
-    activeCategory === "all"
-      ? allProducts
-      : allProducts.filter(p =>
-          p.categories.some(c => c.category.slug === activeCategory)
-        )
+  // Filter — parent дарахад children-ийн бараануудыг ч харуулна
+  const filtered = (() => {
+    if (activeCategory === "all") return allProducts
+    const cat = findCategory(categories, activeCategory)
+    const slugs = new Set(cat ? collectSlugs(cat) : [activeCategory])
+    return allProducts.filter(p =>
+      p.categories.some(c => slugs.has(c.category.slug))
+    )
+  })()
 
   // Sort
   const sorted = [...filtered].sort((a: Product, b: Product) => {

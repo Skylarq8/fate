@@ -35,22 +35,12 @@ export default function CategoryItem({
   const hasChildren = category.children && category.children.length > 0
   const isActive = activeCategory === category.slug
 
-  const handleClick = () => {
-    if (hasChildren) {
-      toggleCategory(category.id)
-    } else {
-      setActiveCategory(category.slug, category.slug)
-      setShowFilter(false)
-    }
-  }
-
   return (
     <div className="select-none">
-      <button
-        onClick={handleClick}
+      <div
         style={{ paddingLeft: `${level * 5 + 10}px` }}
         className={`
-          group w-full text-left text-sm py-2 pr-3 rounded-xl
+          group w-full text-sm py-1.5 pr-1 rounded-xl
           flex items-center justify-between gap-2
           transition-all duration-200
           ${isActive
@@ -59,21 +49,20 @@ export default function CategoryItem({
           }
         `}
       >
-        {/* Left: indicator dot + name */}
-        <span className="flex items-center gap-2 min-w-0">
-          {/* Active indicator */}
+        {/* Left: indicator dot + name — дарахад select */}
+        <button
+          onClick={() => { setActiveCategory(category.slug, category.slug); setShowFilter(false) }}
+          className="flex items-center gap-2 min-w-0 flex-1 text-left"
+        >
           <span className={`
-            flex-shrink-0 w-1.5 h-1.5 rounded-full transition-all duration-200
+            shrink-0 w-1.5 h-1.5 rounded-full transition-all duration-200
             ${isActive ? "bg-rose-500 scale-100" : "bg-white/0 group-hover:bg-white/20 scale-75"}
           `} />
-
           <span className="truncate leading-snug">{category.name}</span>
-        </span>
+        </button>
 
-        {/* Right: count badge OR chevron */}
-        <span className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Count badge: always on leaf, hidden on expanded parent */}
-          {category.productCount > 0 && (!hasChildren || !isOpen) && (
+        <span className="flex items-center gap-1 shrink-0">
+          {category.productCount > 0 && (
             <span className={`
               text-[11px] px-1.5 py-0.5 rounded-md font-medium tabular-nums
               transition-colors duration-200
@@ -86,18 +75,23 @@ export default function CategoryItem({
             </span>
           )}
 
-          {/* Chevron for expandable categories */}
+          {/* Chevron — дарахад dropdown toggle */}
           {hasChildren && (
-            <ChevronRight
-              size={13}
-              className={`
-                transition-transform duration-200 text-white/30
-                ${isOpen ? "rotate-90 text-white/60" : ""}
-              `}
-            />
+            <button
+              onClick={() => toggleCategory(category.id)}
+              className="p-2 rounded-lg hover:bg-white/10 transition-all"
+            >
+              <ChevronRight
+                size={17}
+                className={`
+                  transition-transform duration-200 text-white/50
+                  ${isOpen ? "rotate-90 text-white/70" : ""}
+                `}
+              />
+            </button>
           )}
         </span>
-      </button>
+      </div>
 
       {/* Children — animated expand */}
       {hasChildren && (
