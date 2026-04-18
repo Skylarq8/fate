@@ -69,6 +69,17 @@ export async function getProduct(id: string): Promise<Product | null> {
   return data.data ?? null
 }
 
+export async function getTrendingProducts(limit = 50): Promise<Product[]> {
+  const data = await cachedFetch(`${BASE_URL}/api/products/trending?limit=${limit}`)
+  return (data.data ?? []).filter((p: Product) => p.status === "active")
+}
+
+export async function getProductsByGender(slug: string): Promise<Product[]> {
+  const data = await cachedFetch(`${BASE_URL}/api/products/by-gender?slug=${encodeURIComponent(slug)}`)
+  const list: Product[] = Array.isArray(data?.data?.products) ? data.data.products : []
+  return list.filter((p) => p.status === "active")
+}
+
 // ── Categories (tree) ─────────────────────────────────────────────────────────
 export async function getCategories(): Promise<Category[]> {
   const data = await cachedFetch(`${BASE_URL}/api/categories`)

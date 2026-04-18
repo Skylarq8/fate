@@ -32,6 +32,7 @@ interface Props {
 }
 
 export default function ProductSlider({ title, products }: Props) {
+  if (products.length === 0) return null
   const swiperRef   = useRef<SwiperType | null>(null)
   const titleReveal = useReveal()
   const [isBeginning, setIsBeginning] = useState(true)
