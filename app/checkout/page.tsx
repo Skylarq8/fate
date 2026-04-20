@@ -150,26 +150,21 @@ function AddressSheet({ open, onClose, onSave }: {
         onClick={onClose}
       />
 
-      {/* Sheet — mobile: bottom, desktop: center */}
-      <div className="fixed z-50
-        bottom-0 left-0 right-0 rounded-t-3xl
-        md:inset-0 md:flex md:items-center md:justify-center md:bottom-auto md:left-auto md:right-auto md:top-auto md:rounded-none md:bg-transparent md:border-0 md:p-0
-        pointer-events-none
-      ">
-      <div className={`
-        pointer-events-auto
-        w-full rounded-t-3xl
-        md:rounded-2xl md:w-[480px]
-        bg-[#0f0f0f] border border-white/10
-        flex flex-col
-        max-h-[90vh] md:max-h-[85vh]
-        transition-all duration-350 ease-out
-        translate-y-0 md:translate-y-0
-        ${visible
-          ? "translate-y-0 md:opacity-100 md:scale-100"
-          : "translate-y-full md:translate-y-0 md:opacity-0 md:scale-95"
-        }
+      {/* Sheet wrapper — mobile: bottom, desktop: centered */}
+      <div className={`fixed inset-x-0 bottom-0 z-50 pointer-events-none
+        md:inset-0 md:flex md:items-center md:justify-center
+        transition-transform duration-300 ease-out
+        md:transition-none
+        ${visible ? "translate-y-0" : "translate-y-full md:translate-y-0"}
       `}>
+        <div className={`pointer-events-auto
+          w-full rounded-t-3xl
+          md:rounded-2xl md:w-[480px]
+          bg-[#0f0f0f] border border-white/10
+          flex flex-col max-h-[90vh] md:max-h-[85vh]
+          md:transition-all md:duration-300 md:ease-out
+          ${visible ? "md:opacity-100 md:scale-100" : "md:opacity-0 md:scale-95"}
+        `}>
         {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 p-5 space-y-3 pb-0">
 
@@ -368,7 +363,7 @@ function AddressSheet({ open, onClose, onSave }: {
             Хадгалах
           </button>
         </div>
-      </div>
+        </div>
       </div>
     </>
   )

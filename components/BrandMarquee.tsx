@@ -1,30 +1,29 @@
 "use client"
 
+import Image from "next/image"
+import { useRef, useEffect, useState } from "react"
+
 const brands = [
-  { name: "Essentials", sub: "FEAR OF GOD" },
-  { name: "Maison Margiela", sub: "PARIS" },
-  { name: "Stüssy", sub: "" },
-  { name: "Chrome Hearts", sub: "" },
-  { name: "Supreme", sub: "" },
-  { name: "Off-White", sub: "C/O VIRGIL ABLOH" },
+  { name: "Essentials", sub: "FEAR OF GOD", logo: "/brands/Essentials.png" },
+  { name: "Maison Margiela", sub: "PARIS", logo: "/brands/Maison.png" },
+  { name: "Stüssy", sub: "", logo: "/brands/Stussy.png" },
+  { name: "Chrome Hearts", sub: "", logo: "/brands/Chrome.png" },
+  { name: "Corteiz", sub: "C/O VIRGIL ABLOH", logo: "/brands/Corteiz.png" },
 ]
 
-function BrandList() {
+function BrandList({ innerRef }: { innerRef?: React.RefObject<HTMLDivElement | null> }) {
   return (
-    <div className="flex shrink-0 items-center">
+    <div ref={innerRef} className="flex shrink-0 items-center">
       {brands.map((brand, i) => (
-        <span key={i} className="flex items-center">
-          <span className="flex flex-col items-center mx-10">
-            <span className="text-white/90 text-sm font-heading font-semibold tracking-widest uppercase">
-              {brand.name}
-            </span>
-            {brand.sub && (
-              <span className="text-white/40 text-[9px] tracking-[0.2em] uppercase mt-0.5">
-                {brand.sub}
-              </span>
-            )}
-          </span>
-          <span className="text-white/50 text-xl select-none">✦</span>
+        <span key={i} className="flex items-center mx-7 lg:mx-10">
+          <Image
+            src={brand.logo}
+            alt={brand.name}
+            width={100}
+            height={60}
+            priority
+            className="object-contain"
+          />
         </span>
       ))}
     </div>
@@ -32,58 +31,39 @@ function BrandList() {
 }
 
 export default function BrandMarquee() {
+  const firstRef  = useRef<HTMLDivElement>(null)
+  const trackRef  = useRef<HTMLDivElement>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const measure = () => {
+      if (!firstRef.current || !trackRef.current) return
+      const w = firstRef.current.offsetWidth
+      if (w === 0) return
+      trackRef.current.style.setProperty("--marquee-dist", `-${w}px`)
+      setReady(true)
+    }
+
+    // Measure after images load
+    measure()
+    window.addEventListener("load", measure)
+    const timer = setTimeout(measure, 500)
+    return () => {
+      window.removeEventListener("load", measure)
+      clearTimeout(timer)
+    }
+  }, [])
+
   return (
     <div className="overflow-hidden py-5 my-10 lg:my-14 -mx-5 sm:-mx-10 lg:-mx-34">
-      <div className="flex w-max animate-marquee will-change-transform">
-        <BrandList />
+      <div
+        ref={trackRef}
+        className={`flex w-max will-change-transform ${ready ? "animate-marquee-px" : ""}`}
+      >
+        <BrandList innerRef={firstRef} />
+        <BrandList aria-hidden />
         <BrandList aria-hidden />
       </div>
     </div>
   )
 }
-
-
-// "use client"
-
-// import Image from "next/image"
-
-// const brands = [
-//   { name: "Essentials", sub: "FEAR OF GOD", logo: "/brands/Essentials.jpg" },
-//   { name: "Maison Margiela", sub: "PARIS", logo: "/brands/Maison-Margiela.jpg" },
-//   { name: "Stüssy", sub: "", logo: "/brands/Stüssy.jpg" },
-//   { name: "Chrome Hearts", sub: "", logo: "/brands/Chrome-Hearts.jpg" },
-//   { name: "Bape", sub: "", logo: "/brands/Bape.jpg" },
-//   { name: "Corteiz", sub: "C/O VIRGIL ABLOH", logo: "/brands/Corteiz.jpg" },
-// ]
-
-// function BrandList() {
-//   return (
-//     <div className="flex shrink-0 items-center">
-//       {brands.map((brand, i) => (
-//         <span key={i} className="flex items-center">
-//           <span className="flex flex-col items-center mx-10">
-//             <Image
-//               src={brand.logo}
-//               alt={brand.name}
-//               width={80}
-//               height={40}
-//               className="object-contain opacity-70 hover:opacity-100 transition-opacity"
-//             />
-//           </span>
-//           <span className="text-white/20 text-xl select-none">✦</span>
-//         </span>
-//       ))}
-//     </div>
-//   )
-// }
-
-// export default function BrandMarquee() {
-//   return (
-//     <div className="overflow-hidden py-5 border-y border-white/8 my-10 lg:my-14 -mx-5 sm:-mx-10 lg:-mx-34">
-//       <div className="flex w-max animate-marquee will-change-transform">
-//         <BrandList />
-//         <BrandList aria-hidden />
-//       </div>
-//     </div>
-//   )
-// }

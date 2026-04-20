@@ -1,5 +1,6 @@
 import Accordin from "@/components/Accordin";
 import BrandMarquee from "@/components/BrandMarquee";
+import MusicCards from "@/components/MusicCards";
 import Footer from "@/components/Footer";
 import HeroSlider from "@/components/HeroSlider";
 import ProductSlider from "@/components/ProductSlider";
@@ -30,6 +31,7 @@ export default async function Home() {
       <ProductSlider title="Эрэгтэй" products={mens}/>
       <ProductSlider title="Эмэгтэй" products={womens}/>
       <ProductSlider title="Шинэ бараанууд" products={newArrivals}/>
+      <MusicCards/>
       <BrandMarquee/>
       <p className="font-body font-medium text-center text-sm lg:text-xl mt-10 lg:mt-15 text-white/90">Хүмүүсийн нийтлэг асуудаг асуултууд</p>
       <h1 className="font-heading font-semibold text-center text-2xl lg:text-3xl mt-3 text-white/90">FAQ</h1>

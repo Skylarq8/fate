@@ -168,3 +168,12 @@
 .animate-marquee {
   animation: marquee 25s linear infinite;
 }
+
+@keyframes marquee-px {
+  from { transform: translateX(0) }
+  to   { transform: translateX(var(--marquee-dist, -50%)) }
+}
+
+.animate-marquee-px {
+  animation: marquee-px 18s linear infinite;
+}
