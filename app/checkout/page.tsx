@@ -1,7 +1,7 @@
 // 📁 app/checkout/page.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPinPlus, X, Home, Building2, Briefcase, ShoppingCart, Wallet2, Truck, CheckCircle2 } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
@@ -120,19 +120,33 @@ function AddressSheet({ open, onClose, onSave }: {
     { key: "office",    label: "Оффис",     icon: <Briefcase size={15} /> },
   ]
 
-  // Scroll lock
-  if (typeof document !== "undefined") {
-    if (open) document.body.style.overflow = "hidden"
-    else document.body.style.overflow = ""
-  }
+  const [visible, setVisible]       = useState(false)
+  const [shouldRender, setShouldRender] = useState(false)
 
-  if (!open) return null
+  useEffect(() => {
+    if (open) {
+      setShouldRender(true)
+      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)))
+    } else {
+      setVisible(false)
+      const t = setTimeout(() => setShouldRender(false), 350)
+      return () => clearTimeout(t)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [open])
+
+  if (!shouldRender) return null
 
   return (
-    <div className="flex justify-center items-start mt-30">
+    <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
         onClick={onClose}
       />
 
@@ -142,14 +156,20 @@ function AddressSheet({ open, onClose, onSave }: {
         md:inset-0 md:flex md:items-center md:justify-center md:bottom-auto md:left-auto md:right-auto md:top-auto md:rounded-none md:bg-transparent md:border-0 md:p-0
         pointer-events-none
       ">
-      <div className="
+      <div className={`
         pointer-events-auto
         w-full rounded-t-3xl
         md:rounded-2xl md:w-[480px]
         bg-[#0f0f0f] border border-white/10
         flex flex-col
         max-h-[90vh] md:max-h-[85vh]
-      ">
+        transition-all duration-350 ease-out
+        translate-y-0 md:translate-y-0
+        ${visible
+          ? "translate-y-0 md:opacity-100 md:scale-100"
+          : "translate-y-full md:translate-y-0 md:opacity-0 md:scale-95"
+        }
+      `}>
         {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 p-5 space-y-3 pb-0">
 
@@ -350,7 +370,7 @@ function AddressSheet({ open, onClose, onSave }: {
         </div>
       </div>
       </div>
-    </div>
+    </>
   )
 }
 

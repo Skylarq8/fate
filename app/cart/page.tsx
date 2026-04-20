@@ -342,18 +342,18 @@ export default function CartPage() {
             </Link>
 
             <div className="flex flex-col gap-3 pt-3">
-              <div className="flex-1 flex gap-3 items-start p-3 rounded-xl border border-white/8 bg-white/4">
-                <Truck size={20} className="text-white/60 mt-0.5 shrink-0" />
+              <div className="flex-1 flex gap-3 items-start p-3 rounded-xl border border-rose-500/30 backdrop-blur-sm bg-rose-500/8">
+                <Truck size={20} className="text-white mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-white/90 text-[13px] font-semibold">Хүргэлтийн нөхцөл</p>
-                  <p className="text-white/40 text-[13px] mt-0.5">Бид таны захиалгыг 5-10 хоногийн дотор хүргэнэ.</p>
+                  <p className="text-white text-[13px] font-semibold">Хүргэлтийн нөхцөл</p>
+                  <p className="text-white/60 text-[13px] mt-0.5">Бид таны захиалгыг 5-10 хоногийн дотор хүргэнэ.</p>
                 </div>
               </div>
-              <div className="flex-1 flex gap-3 items-start p-3 rounded-xl border border-white/8 bg-white/4">
-                <CreditCard size={20} className="text-white/60 mt-0.5 shrink-0" />
+              <div className="flex-1 flex gap-3 items-start p-3 rounded-xl border border-rose-500/30 backdrop-blur-sm bg-rose-500/8">
+                <CreditCard size={20} className="text-white mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-white/90 text-[13px] font-semibold">Төлбөрийн нөхцөл</p>
-                  <p className="text-white/40 text-[13px] mt-0.5">Энэхүү дэлгүүр нь туршилтын хувилбар тул төлбөр буцаагдахгүй.</p>
+                  <p className="text-white text-[13px] font-semibold">Төлбөрийн нөхцөл</p>
+                  <p className="text-white/60 text-[13px] mt-0.5">Захиалга баталгаажиж бараа ирж байгаа тохиолдолд буцаан олголт байхгүй.</p>
                 </div>
               </div>
             </div>
