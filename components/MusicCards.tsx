@@ -14,7 +14,7 @@ interface Track {
 const tracks: Track[] = [
   { id: "1", artist: "Drake",       song: "CAN I",         image: "https://i.pinimg.com/736x/e2/19/c1/e219c15db31285cdac8a92f20a1b1cbb.jpg", audio: "/music/Drake.mp3"  },
   { id: "2", artist: "Carti",       song: "SKY",           image: "https://i.pinimg.com/736x/e2/ff/09/e2ff090bbadb84e9563b63b70a53acde.jpg", audio: "/music/Carti.mp3"  },
-  { id: "3", artist: "ASAP Rocky",  song: "Fashion Killa", image: "https://i.pinimg.com/736x/5a/2b/bf/5a2bbf80270e06602fe950c1fbc00996.jpg", audio: "/music/ASAP.mp3"   },
+  { id: "3", artist: "ASAP Rocky",  song: "Fashion Killa", image: "https://i.pinimg.com/736x/5a/2b/bf/5a2bbf80270e06602fe950c1fbc00996.jpg", audio: "/music/Asap.mp3"   },
   { id: "4", artist: "Travis Scott",song: "FEIN",          image: "https://i.pinimg.com/736x/be/78/72/be78725c40ac25319f1d2ae5ca549810.jpg", audio: "/music/Fein.mp3"  },
 ]
 
