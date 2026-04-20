@@ -3,19 +3,41 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPin, X, Home, Building2, Briefcase, ShoppingCart, Wallet2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, Phone, Mail, MapPinPlus, X, Home, Building2, Briefcase, ShoppingCart, Wallet2, Truck, CheckCircle2 } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 import { useToast } from "@/context/ToastContext"
 import { fmt } from "@/lib/api"
 import { CITIES, getDistricts, getKhoroos } from "@/lib/data/location"
 
 type AddressType = "apartment" | "house" | "office"
+type DeliveryType = "delivery" | "pickup"
+
+interface SavedAddress {
+  id: string
+  type: AddressType
+  label: string
+  title: string
+  detail: string
+  full: string
+}
+
+const TYPE_LABELS: Record<AddressType, string> = {
+  apartment: "Орон сууц",
+  house:     "Хашаа байшин",
+  office:    "Оффис",
+}
+
+const TYPE_COLORS: Record<AddressType, string> = {
+  apartment: "bg-blue-500/20 text-blue-300",
+  house:     "bg-green-500/20 text-green-300",
+  office:    "bg-purple-500/20 text-purple-300",
+}
 
 // ── Address Bottom Sheet ─────────────────────────────────────────────────
 function AddressSheet({ open, onClose, onSave }: {
   open: boolean
   onClose: () => void
-  onSave: (address: string) => void
+  onSave: (address: SavedAddress) => void
 }) {
   const [type, setType]         = useState<AddressType>("apartment")
   const [city, setCity]         = useState("Улаанбаатар")
@@ -60,16 +82,25 @@ function AddressSheet({ open, onClose, onSave }: {
     setErrors(e)
     if (Object.keys(e).length > 0) return
  
-    let parts: string[] = [city, district, khoroo]
+    const title = [city, district, khoroo].join(", ")
+    let detailParts: string[] = []
     if (type === "apartment") {
-      parts = [...parts, `${building}-р байр`, `${door}-р тоот`]
+      detailParts = [`${building}-р байр`, `тоот ${door}`]
     } else if (type === "house") {
-      parts = [...parts, `${streetNum}-р гудамж`, `${houseNum}-р байшин`]
+      detailParts = [`${streetNum}-р гудамж`, `${houseNum}-р байшин`]
     } else if (type === "office") {
-      parts = [...parts, officeBuilding, `${officeFloor}-р давхар`, `${officeDoor}-р тоот`, officeName]
+      detailParts = [officeBuilding, `${officeFloor}-р давхар`, `тоот ${officeDoor}`, officeName]
     }
-    if (extra.trim()) parts.push(extra.trim())
-    onSave(parts.join(", "))
+    if (extra.trim()) detailParts.push(extra.trim())
+    const detail = detailParts.join(", ")
+    onSave({
+      id:     Date.now().toString(),
+      type,
+      label:  TYPE_LABELS[type],
+      title,
+      detail,
+      full:   detail ? `${title}, ${detail}` : title,
+    })
     onClose()
   }
 
@@ -332,13 +363,18 @@ export default function CheckoutPage() {
     ? JSON.parse(sessionStorage.getItem("coupon") || "null")
     : null
 
-  const [loading,          setLoading]          = useState(false)
-  const [addressSheetOpen, setAddressSheetOpen] = useState(false)
-  const [customerName,     setCustomerName]     = useState("")
-  const [phone,            setPhone]            = useState("")
-  const [email,            setEmail]            = useState("")
-  const [shippingAddress,  setShippingAddress]  = useState("")
-  const [errors,           setErrors]           = useState<Record<string, string>>({})
+  const [loading,           setLoading]           = useState(false)
+  const [addressSheetOpen,  setAddressSheetOpen]  = useState(false)
+  const [customerName,      setCustomerName]      = useState("")
+  const [phone,             setPhone]             = useState("")
+  const [email,             setEmail]             = useState("")
+  const [deliveryType,      setDeliveryType]      = useState<"delivery" | "pickup">("delivery")
+  const [savedAddresses,    setSavedAddresses]    = useState<SavedAddress[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const [errors,            setErrors]            = useState<Record<string, string>>({})
+
+  const selectedAddress = savedAddresses.find(a => a.id === selectedAddressId)
+  const shippingAddress = deliveryType === "pickup" ? "Дэлгүүрээс очиж авах" : (selectedAddress?.full ?? "")
 
   const baseTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const productDiscount = items.reduce((sum, item) => {
@@ -446,7 +482,8 @@ export default function CheckoutPage() {
         open={addressSheetOpen}
         onClose={() => setAddressSheetOpen(false)}
         onSave={(addr) => {
-          setShippingAddress(addr)
+          setSavedAddresses(prev => [...prev, addr])
+          setSelectedAddressId(addr.id)
           setErrors(p => ({ ...p, shippingAddress: "" }))
         }}
       />
@@ -485,35 +522,94 @@ export default function CheckoutPage() {
                 </div>
               ))}
 
-              {/* Хүргэлтийн хаяг */}
-              <div className="space-y-2">
-                <label className="text-xs text-white/90 uppercase tracking-wide flex items-center gap-1.5">
-                  <MapPin size={16} className="text-white/90" /> Хүргэлтийн хаяг
-                </label>
-                {shippingAddress ? (
-                  <div className="glass-sm rounded-xl px-4 py-3 border border-white/25 flex items-start justify-between gap-3">
-                    <p className="text-white text-sm leading-relaxed flex-1">{shippingAddress}</p>
-                    <button onClick={() => setAddressSheetOpen(true)} className="text-xs text-white/40 hover:text-white underline flex-shrink-0 transition-colors">
-                      Засах
-                    </button>
-                  </div>
-                ) : (
+              {/* Хүргэлтийн төрөл */}
+              <div className="space-y-3">
+                <h3 className="font-display text-base font-bold text-white">Хүргэлтийн төрөл</h3>
+
+                {/* Warning */}
+                {/* <div className="flex gap-2 px-3 py-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs">
+                  <span className="font-semibold shrink-0">Анхаар:</span>
+                  <span>Манай дэлгүүр зөвхөн Улаанбаатар хот дотор хүргэлт хийнэ.</span>
+                </div> */}
+
+                {/* Radio options */}
+                {[
+                  { key: "delivery", label: "Хүргэлтээр авах",      sub: "100,000₮-с дээш үнэгүй", icon: <Truck size={18} className="text-white" /> },
+                  // { key: "pickup",   label: "Дэлгүүрээс очиж авах", sub: null,                      icon: <Store size={18} className="text-white/50" /> },
+                ].map(opt => (
                   <button
-                    onClick={() => setAddressSheetOpen(true)}
-                    className={`w-full glass-sm rounded-xl px-4 py-3 text-left text-white/40 border transition-colors hover:border-rose-500/50 hover:text-white/60 ${
-                      errors.shippingAddress ? "border-red-500/50" : "border-white/25"
+                    key={opt.key}
+                    onClick={() => setDeliveryType(opt.key as "delivery" | "pickup")}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border transition-all ${
+                      deliveryType === opt.key ? "border-rose-500/60 bg-rose-500/10" : "border-white/10 hover:border-rose-500/30"
                     }`}
                   >
-                    + Хүргэлтийн хаяг оруулах
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        deliveryType === opt.key ? "border-rose-500" : "border-white/30"
+                      }`}>
+                        {deliveryType === opt.key && <div className="w-2 h-2 rounded-full bg-rose-500" />}
+                      </div>
+                      <div className="text-left">
+                        <p className="text-white text-sm font-medium">{opt.label}</p>
+                        {opt.sub && <p className="text-rose-400 text-xs mt-0.5">{opt.sub}</p>}
+                      </div>
+                    </div>
+                    {opt.icon}
                   </button>
-                )}
-                {errors.shippingAddress && <p className="text-xs text-red-400">{errors.shippingAddress}</p>}
+                ))}
               </div>
+
+              {/* Хүргэлтийн хаяг */}
+              {deliveryType === "delivery" && (
+                <div className="space-y-3">
+                  <h3 className="font-display text-base font-bold text-white">Хүргэлтийн хаяг</h3>
+
+                  {/* Хаяг нэмэх товч */}
+                  <button
+                    onClick={() => setAddressSheetOpen(true)}
+                    className="w-full flex flex-row lg:flex-col items-center justify-center gap-2 py-3.5 lg:py-5 rounded-2xl border-2 border-dotted border-rose-500/50 text-white/80 text-sm font-semibold hover:border-rose-500 hover:bg-rose-500/5 transition-all"
+                  >
+                    <MapPinPlus size={20} className="text-white/70 lg:size-6" />
+                    Шинэ хаяг нэмэх
+                  </button>
+
+                  {/* Saved address cards */}
+                  {savedAddresses.map(addr => (
+                    <button
+                      key={addr.id}
+                      onClick={() => { setSelectedAddressId(addr.id); setErrors(p => ({ ...p, shippingAddress: "" })) }}
+                      className={`w-full text-left p-4 rounded-xl border transition-all ${
+                        selectedAddressId === addr.id
+                          ? "border-rose-500/60 bg-rose-500/10 backdrop-blur-sm"
+                          : "border-white/10 bg-white/5 backdrop-blur-sm hover:border-rose-500/30"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <span className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full ${TYPE_COLORS[addr.type]}`}>
+                            {addr.label}
+                          </span>
+                          <p className="text-white font-semibold text-sm">{addr.title}</p>
+                          {addr.detail && <p className="text-white/40 text-xs">{addr.detail}</p>}
+                        </div>
+                        {selectedAddressId === addr.id && (
+                          <CheckCircle2 size={18} className="text-rose-400 shrink-0 mt-1" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+
+                  {errors.shippingAddress && <p className="text-xs text-red-400">{errors.shippingAddress}</p>}
+                </div>
+              )}
+
+              <h3 className="font-display text-base font-bold text-white">Төлбөр</h3>
 
               <button
                 onClick={handleSubmitOrder}
                 disabled={loading}
-                className="w-full py-4 bg-rose-500 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+                className="w-full py-3.5 bg-rose-500 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
               >
                 {loading
                   ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
