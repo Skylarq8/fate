@@ -2,12 +2,9 @@
 
 import { Phone, Mail } from "lucide-react";
 import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa"
-import { FooterPromoBar } from "@/components/PromoPopup"
-
 export default function Footer() {
   return (
     <footer id="about" className="text-white mt-3">
-      <FooterPromoBar />
     <div className="py-8 px-4">
     <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center sm:text-left lg:mt-10">
         {/* Contact info */}

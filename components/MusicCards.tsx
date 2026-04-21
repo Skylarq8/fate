@@ -195,7 +195,7 @@ export default function MusicCards() {
   const visibleTracks = tracks.slice(page * 2, page * 2 + 2)
 
   return (
-    <div className="mt-10 lg:mt-30">
+    <div className="mt-5 lg:mt-8">
       {/* Desktop: 4 column grid — overflow visible for 3D */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-4 py-6 px-1">
         {tracks.map(track => (

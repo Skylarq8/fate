@@ -60,7 +60,7 @@ export default function ProductSlider({ title, products }: Props) {
   }, [])
 
   return (
-    <div className="mt-3 md:mt-7 lg:mt-9">
+    <div className="mt-3 md:mt-5 lg:mt-6">
 
       {/* ── Title row ── */}
       <div

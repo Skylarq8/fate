@@ -96,121 +96,115 @@ export function PromoPopup() {
       {/* Backdrop */}
       <div
         onClick={dismiss}
-        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-black/75 backdrop-blur-md transition-opacity duration-300 ${
           visible ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* Card */}
-      <div
-        className={`fixed inset-x-4 bottom-4 sm:inset-auto sm:bottom-8 sm:right-8 sm:w-[380px] z-50
-          transition-all duration-350 ease-out
-          ${visible
-            ? "opacity-100 translate-y-0 sm:translate-y-0 scale-100"
-            : "opacity-0 translate-y-6 sm:translate-y-6 scale-95 pointer-events-none"
+      {/* Centered card */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none">
+        <div
+          className={`w-full max-w-[420px] pointer-events-auto transition-all duration-300 ease-out ${
+            visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4"
           }`}
-      >
-        <div className="relative bg-[#111] border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/60">
+        >
+          <div className="relative bg-[#0f0f0f] border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black">
 
-          {/* Top gradient accent */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/60 to-transparent" />
+            {/* Top rose line */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/70 to-transparent" />
 
-          {/* Close */}
-          <button
-            onClick={dismiss}
-            className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white/8 hover:bg-white/15 flex items-center justify-center text-white/50 hover:text-white transition-all"
-            aria-label="Хаах"
-          >
-            <X size={14} />
-          </button>
+            {/* Close */}
+            <button
+              onClick={dismiss}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/6 hover:bg-white/12 flex items-center justify-center text-white/40 hover:text-white transition-all"
+              aria-label="Хаах"
+            >
+              <X size={15} />
+            </button>
 
-          {!code ? (
-            /* ── Form state ── */
-            <div className="p-6 space-y-4">
-              {/* Icon + title */}
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center shrink-0 mt-0.5">
-                  <Gift size={18} className="text-rose-400" />
+            {!code ? (
+              /* ── Form state ── */
+              <div className="p-7">
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-4">
+                    <Gift size={24} className="text-rose-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white tracking-tight">🎁 10% хямдрал аваарай</h3>
+                  <p className="text-white/40 text-sm mt-1.5 leading-relaxed">
+                    Анхны захиалгадаа зориулсан онцгой код авахын тулд<br/>имэйл хаягаа оруулна уу
+                  </p>
                 </div>
-                <div>
-                  <h3 className="font-bold text-white text-base leading-tight">10% хямдрал аваарай</h3>
-                  <p className="text-white/45 text-[13px] mt-0.5">Анхны захиалгадаа зориулсан</p>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+                    <input
+                      ref={inputRef}
+                      type="email"
+                      value={email}
+                      onChange={e => { setEmail(e.target.value); setError(null) }}
+                      placeholder="imeil@example.com"
+                      className={`w-full bg-white/5 border rounded-2xl pl-11 pr-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors
+                        ${error ? "border-red-500/50" : "border-white/10 focus:border-rose-500/40"}`}
+                    />
+                  </div>
+
+                  {error && (
+                    <p className="text-[12px] text-red-400 px-1">{error}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email.trim()}
+                    className="w-full py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {loading
+                      ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      : <>Код авах <ChevronRight size={15} /></>
+                    }
+                  </button>
+                </form>
+
+                <div className="flex items-center justify-center gap-1.5 mt-4">
+                  <Clock size={11} className="text-white/20 shrink-0" />
+                  <p className="text-[11px] text-white/20">24 цагийн хүчинтэй</p>
                 </div>
               </div>
-
-              <p className="text-white/55 text-[13px] leading-relaxed">
-                Онцгой код авахын тулд имэйл хаягаа оруулна уу.
-              </p>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-                  <input
-                    ref={inputRef}
-                    type="email"
-                    value={email}
-                    onChange={e => { setEmail(e.target.value); setError(null) }}
-                    placeholder="imeil@example.com"
-                    className={`w-full bg-white/5 border rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-colors
-                      ${error ? "border-red-500/50" : "border-white/10 focus:border-rose-500/50"}`}
-                  />
+            ) : (
+              /* ── Success state ── */
+              <div className="p-7 text-center space-y-5">
+                <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto">
+                  <Sparkles size={24} className="text-rose-400" />
                 </div>
 
-                {error && (
-                  <p className="text-[12px] text-red-400 px-1">{error}</p>
-                )}
+                <div>
+                  <h3 className="text-xl font-bold text-white">🎉 Код бэлэн боллоо!</h3>
+                  <p className="text-white/40 text-sm mt-1">Имэйл хаяг руу тань илгээлээ</p>
+                </div>
+
+                {/* Code box */}
+                <div className="bg-rose-500/8 border border-dashed border-rose-500/35 rounded-2xl py-5 px-4">
+                  <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-2">Таны код</p>
+                  <p className="text-3xl font-black tracking-[0.25em] text-rose-400 font-mono">{code}</p>
+                  <p className="text-[12px] text-white/30 mt-2">10% хямдрал · 1 удаа ашиглах</p>
+                </div>
+
+                <div className="flex items-center justify-center gap-1.5">
+                  <Clock size={12} className="text-orange-400/60 shrink-0" />
+                  <p className="text-[12px] text-orange-300/60">24 цагийн дотор ашиглана уу</p>
+                </div>
 
                 <button
-                  type="submit"
-                  disabled={loading || !email.trim()}
-                  className="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  onClick={dismiss}
+                  className="w-full py-3 rounded-2xl bg-white/6 hover:bg-white/10 text-white/60 hover:text-white text-sm font-medium transition-all"
                 >
-                  {loading
-                    ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    : <>Код авах <ChevronRight size={15} /></>
-                  }
+                  Хаах
                 </button>
-              </form>
-
-              {/* Footer note */}
-              <div className="flex items-center gap-1.5 pt-1">
-                <Clock size={12} className="text-white/25 shrink-0" />
-                <p className="text-[11px] text-white/25">24 цагийн хүчинтэй · Spam явуулахгүй</p>
               </div>
-            </div>
-          ) : (
-            /* ── Success state ── */
-            <div className="p-6 space-y-4 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center mx-auto">
-                <Sparkles size={22} className="text-rose-400" />
-              </div>
-
-              <div>
-                <h3 className="font-bold text-white text-base">🎉 Таны код бэлэн боллоо!</h3>
-                <p className="text-white/45 text-[13px] mt-1">Имэйл рүү тань илгээлээ</p>
-              </div>
-
-              {/* Code box */}
-              <div className="bg-rose-500/10 border border-dashed border-rose-500/40 rounded-2xl py-4 px-3">
-                <p className="text-[11px] text-white/35 uppercase tracking-widest mb-1">Таны код</p>
-                <p className="text-2xl font-black tracking-[0.2em] text-rose-400 font-mono">{code}</p>
-                <p className="text-[12px] text-white/35 mt-1.5">10% хямдрал</p>
-              </div>
-
-              <div className="flex items-center justify-center gap-1.5">
-                <Clock size={12} className="text-orange-400/70 shrink-0" />
-                <p className="text-[12px] text-orange-300/70">24 цагийн дотор ашиглана уу!</p>
-              </div>
-
-              <button
-                onClick={dismiss}
-                className="w-full py-2.5 rounded-xl bg-white/8 hover:bg-white/12 text-white/70 hover:text-white text-sm font-medium transition-all"
-              >
-                Хаах
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </>
@@ -243,73 +237,85 @@ export function FooterPromoBar() {
   if (dismissed) return null
 
   return (
-    <div className="relative border-t border-white/8 bg-gradient-to-b from-rose-950/10 to-transparent">
-      {/* Top accent line */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/30 to-transparent" />
+    <div className="pt-10 pb-2">
 
-      <div className="max-w-lg mx-auto px-5 py-6">
+      {/* Title above container */}
+      <div className="max-w-lg mx-auto mb-3 px-1">
+        <h2 className="text-white lg:text-center font-bold text-xl mt-0.5 tracking-tight">Урамшуулал аваарай</h2>
+      </div>
+
+      {/* Glass container */}
+      <div className="relative max-w-lg mx-auto rounded-2xl overflow-hidden
+        bg-white/4 backdrop-blur-xl border border-white/10
+        shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_20px_40px_rgba(0,0,0,0.3)]">
+
+        {/* top glow */}
+        <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-rose-500/50 to-transparent" />
+
+        {/* X */}
+        <button
+          onClick={() => setDismissed(true)}
+          className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full hover:bg-white/8 flex items-center justify-center text-white/25 hover:text-white/70 transition-all"
+          aria-label="Хаах"
+        >
+          <X size={12} />
+        </button>
+
         {!code ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Gift size={16} className="text-rose-400 shrink-0" />
-                <span className="text-white/80 text-sm font-medium">10% хямдрал авах уу?</span>
-              </div>
-              <button
-                onClick={() => setDismissed(true)}
-                className="text-white/20 hover:text-white/50 transition-colors"
-                aria-label="Хаах"
-              >
-                <X size={14} />
-              </button>
-            </div>
+          <div className="p-5 pr-5 space-y-4">
 
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <div className="relative flex-1">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => { setEmail(e.target.value); setError(null) }}
-                  placeholder="Имэйл хаяг"
-                  className={`w-full bg-white/5 border rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-colors
-                    ${error ? "border-red-500/50" : "border-white/10 focus:border-rose-500/40"}`}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading || !email.trim()}
-                className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 active:scale-[0.98] text-white text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shrink-0"
-              >
-                {loading
-                  ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : "Код авах"
-                }
-              </button>
-            </form>
-
-            {error && <p className="text-[12px] text-red-400">{error}</p>}
-
-            <p className="text-[11px] text-white/20">⏳ 24 цагийн хүчинтэй · Spam явуулахгүй</p>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center shrink-0">
-                <Sparkles size={16} className="text-rose-400" />
+            {/* Top row: icon + texts */}
+            <div className="flex items-center gap-2">
+              <div className="w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/25 flex items-center justify-center shrink-0">
+                <Gift size={17} className="text-rose-400" />
               </div>
               <div>
-                <p className="text-white text-sm font-semibold">🎉 Таны код: <span className="text-rose-400 font-mono tracking-wider">{code}</span></p>
-                <p className="text-white/35 text-[12px]">⏳ 24 цагийн дотор ашиглана уу</p>
+                <p className="text-white font-semibold text-[15px] leading-tight">10% хямдрал аваарай</p>
+                <p className="text-white/50 text-[12px] mt-0.5">Анхны захиалгадаа зориулсан онцгой код</p>
+                <p className="text-white/50 text-[11px] mt-1.5 flex items-center gap-1">⏳ 24 цагийн хүчинтэй</p>
               </div>
             </div>
-            <button
-              onClick={() => setDismissed(true)}
-              className="text-white/20 hover:text-white/50 transition-colors shrink-0"
-              aria-label="Хаах"
-            >
-              <X size={15} />
-            </button>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/80 pointer-events-none" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setError(null) }}
+                    placeholder="mail@example.com"
+                    className={`w-full bg-white/5 border rounded-xl pl-10 pr-3 py-2.5 text-base text-white placeholder-white/18 outline-none transition-colors
+                      ${error ? "border-red-500/40" : "border-white/8 focus:border-rose-500/35"}`}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || !email.trim()}
+                  className="px-3.5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 active:scale-[0.97] text-white text-[12px] font-semibold transition-all disabled:opacity-35 disabled:cursor-not-allowed shrink-0 flex items-center gap-1.5"
+                >
+                  {loading
+                    ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    : "Код авах"
+                  }
+                </button>
+              </div>
+              {error && <p className="text-[11px] text-red-400">{error}</p>}
+            </form>
+
+          </div>
+        ) : (
+          /* ── Success ── */
+          <div className="p-5 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/15 flex items-center justify-center shrink-0">
+              <Sparkles size={17} className="text-rose-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-semibold text-sm">🎉 Имэйл рүү тань илгээлээ</p>
+              <p className="text-rose-400 font-mono font-black tracking-[0.15em] text-lg leading-tight mt-0.5">{code}</p>
+              <p className="text-white/25 text-[11px] mt-0.5">⏳ 24 цагийн дотор ашиглана уу</p>
+            </div>
           </div>
         )}
       </div>
