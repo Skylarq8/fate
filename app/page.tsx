@@ -32,9 +32,9 @@ export default async function Home() {
       <ProductSlider title="Эрэгтэй" products={mens}/>
       <ProductSlider title="Эмэгтэй" products={womens}/>
       <ProductSlider title="Шинэ бараанууд" products={newArrivals}/>
-      <FooterPromoBar />
       <MusicCards/>
       <BrandMarquee/>
+      <FooterPromoBar />
       <p className="font-body font-medium text-center text-sm lg:text-xl mt-6 lg:mt-8 text-white/90">Хүмүүсийн нийтлэг асуудаг асуултууд</p>
       <h1 className="font-heading font-semibold text-center text-2xl lg:text-3xl mt-3 text-white/90">FAQ</h1>
       <div className="flex justify-center mt-3">

@@ -55,7 +55,8 @@ export default function BrandMarquee() {
   }, [])
 
   return (
-    <div className="overflow-hidden py-5 my-6 lg:my-8 -mx-5 sm:-mx-10 lg:-mx-34">
+    // py-5 my-6
+    <div className="overflow-hidden lg:my-8 -mx-5 sm:-mx-10 lg:-mx-34">
       <div
         ref={trackRef}
         className={`flex w-max will-change-transform ${ready ? "animate-marquee-px" : ""}`}

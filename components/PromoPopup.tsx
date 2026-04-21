@@ -108,15 +108,15 @@ export function PromoPopup() {
             visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4"
           }`}
         >
-          <div className="relative bg-[#0f0f0f] border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black">
+          <div className="relative bg-background border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black">
 
             {/* Top rose line */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/70 to-transparent" />
+            {/* <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/70 to-transparent" /> */}
 
             {/* Close */}
             <button
               onClick={dismiss}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/6 hover:bg-white/12 flex items-center justify-center text-white/40 hover:text-white transition-all"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-white/12 flex items-center justify-center text-white/40 hover:text-white transition-all"
               aria-label="Хаах"
             >
               <X size={15} />
@@ -240,8 +240,8 @@ export function FooterPromoBar() {
     <div className="pt-10 pb-2">
 
       {/* Title above container */}
-      <div className="max-w-lg mx-auto mb-3 px-1">
-        <h2 className="text-white lg:text-center font-bold text-xl mt-0.5 tracking-tight">Урамшуулал аваарай</h2>
+      <div className="max-w-lg mx-auto mb-3 lg:mb-5 px-1">
+        <h2 className="text-white text-[22px] lg:text-center lg:text-2xl font-bold mt-0.5 tracking-tight">Урамшуулал аваарай</h2>
       </div>
 
       {/* Glass container */}
@@ -250,7 +250,7 @@ export function FooterPromoBar() {
         shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_20px_40px_rgba(0,0,0,0.3)]">
 
         {/* top glow */}
-        <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-rose-500/50 to-transparent" />
+        {/* <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-rose-500 to-transparent" /> */}
 
         {/* X */}
         <button
@@ -271,8 +271,8 @@ export function FooterPromoBar() {
               </div>
               <div>
                 <p className="text-white font-semibold text-[15px] leading-tight">10% хямдрал аваарай</p>
-                <p className="text-white/50 text-[12px] mt-0.5">Анхны захиалгадаа зориулсан онцгой код</p>
-                <p className="text-white/50 text-[11px] mt-1.5 flex items-center gap-1">⏳ 24 цагийн хүчинтэй</p>
+                <p className="text-rose-500/80 text-[12px] mt-0.5">Анхны захиалгадаа зориулсан онцгой код</p>
+                {/* <p className="text-white/50 text-[11px] mt-1.5 flex items-center gap-1">⏳ 24 цагийн хүчинтэй</p> */}
               </div>
             </div>
 
