@@ -185,7 +185,7 @@ export function PromoPopup() {
 
               <div className="flex items-center justify-center gap-1.5">
                 <Clock size={12} className="text-orange-400/70 shrink-0" />
-                <p className="text-[12px] text-orange-300/70">24 цагийн дотор ашиглана уу</p>
+                <p className="text-[12px] text-orange-300/70">24 цагийн дотор ашиглана уу!</p>
               </div>
 
               <button

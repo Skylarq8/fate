@@ -40,29 +40,33 @@ export async function POST(req: NextRequest) {
     const code = generateCode()
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
-    // Create coupon in backend
-    const createRes = await fetch(`${API}/api/coupons`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        code,
-        discountType,
-        discountValue,
-        usageLimit: 1,
-        applyToAll: true,
-        email,
-        expiresAt: expiresAt.toISOString(),
-      }),
-    })
-
-    if (!createRes.ok) {
-      const errData = await createRes.json().catch(() => ({}))
-      console.error("Coupon create failed:", errData)
-      return NextResponse.json({ message: "Код үүсгэхэд алдаа гарлаа" }, { status: 500 })
+    // Create coupon in backend (non-blocking — email sending is the primary action)
+    let couponId: string | undefined
+    try {
+      const createRes = await fetch(`${API}/api/coupons`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          discountType,
+          discountValue,
+          usageLimit: 1,
+          applyToAll: true,
+          email,
+          expiresAt: expiresAt.toISOString(),
+        }),
+      })
+      if (createRes.ok) {
+        const created = await createRes.json()
+        couponId = created?.data?.id ?? created?.id
+        console.log("✅ Coupon created:", code, "id:", couponId)
+      } else {
+        const errData = await createRes.json().catch(() => ({}))
+        console.warn("⚠️ Coupon create failed (continuing):", errData)
+      }
+    } catch (err) {
+      console.warn("⚠️ Coupon create error (continuing):", err)
     }
-
-    const created = await createRes.json()
-    const couponId = created?.data?.id ?? created?.id
 
     // Send email
     const emailResult = await resend.emails.send({
@@ -73,15 +77,17 @@ export async function POST(req: NextRequest) {
     })
 
     if (emailResult.error) {
-      console.error("Resend error:", emailResult.error)
-      // Rollback: delete the coupon
+      console.error("❌ Resend error:", emailResult.error)
+      // Rollback: delete the coupon if it was created
       if (couponId) {
         await fetch(`${API}/api/coupons/${couponId}`, { method: "DELETE" }).catch(() => {})
       }
       return NextResponse.json({ message: "И-мэйл илгээхэд алдаа гарлаа" }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data: { code } })
+    console.log("✅ Promo email sent to:", email, "code:", code, "resend id:", emailResult.data?.id)
+
+    return NextResponse.json({ success: true, data: { code, emailId: emailResult.data?.id } })
   } catch (err) {
     console.error("Promo send error:", err)
     return NextResponse.json({ message: "Серверийн алдаа" }, { status: 500 })

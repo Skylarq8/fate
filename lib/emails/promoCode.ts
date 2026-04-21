@@ -29,7 +29,7 @@ export function promoCodeHtml({ code, discountValue, discountType, expiresAt }: 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Таны хямдралын код</title>
 </head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#0d0d0d;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 0;">
     <tr>
       <td align="center">
@@ -37,8 +37,8 @@ export function promoCodeHtml({ code, discountValue, discountType, expiresAt }: 
 
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#1a0a0a,#2a0a0a);padding:40px 40px 30px;text-align:center;border-bottom:1px solid rgba(239,68,68,0.2);">
-              <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:rgba(239,68,68,0.8);">FATE STORE</p>
+            <td style="background-color:#b91c1c;padding:40px 40px 30px;text-align:center;border-bottom:1px solid rgba(239,68,68,0.2);">
+              <p style="margin:0 0 8px; color:#ffffff; font-size:13px;letter-spacing:3px;text-transform:uppercase;color:rgba(239,68,68,0.8);">FATE STORE</p>
               <h1 style="margin:0;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">🎁 Таны онцгой хямдрал</h1>
             </td>
           </tr>
@@ -104,7 +104,7 @@ export function promoCodeHtml({ code, discountValue, discountType, expiresAt }: 
               <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_URL ?? "https://fate.mn"}/products"
+                    <a href="${"https://fate.mn"}/products"
                        style="display:inline-block;background:#ef4444;color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:12px;letter-spacing:0.3px;">
                       Дэлгүүр хэсэх →
                     </a>
