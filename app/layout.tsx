@@ -6,7 +6,8 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import Galaxy from "@/components/Galaxy";
 import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/context/ToastContext";
-import ScrollToTop from "@/components/ScrollToTop";
+import ScrollToTop from "@/components/ScrollToTop"
+import { PromoPopup } from "@/components/PromoPopup";
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -60,6 +61,7 @@ export default function RootLayout({
                       speed={1}/>
               </div>
               <ScrollToTop />
+              <PromoPopup />
               <ToastProvider>
                 <WishlistProvider>
                   <HeroHeader />
