@@ -4,9 +4,23 @@ import { useState, useEffect, useRef } from "react"
 import { X, Mail, Gift, Clock, Sparkles, ChevronRight } from "lucide-react"
 
 const STORAGE_KEY = "fate_promo_dismissed"
+const USED_EMAILS_KEY = "fate_promo_emails"
+
+function getUsedEmails(): string[] {
+  try { return JSON.parse(localStorage.getItem(USED_EMAILS_KEY) ?? "[]") } catch { return [] }
+}
+function markEmailUsed(email: string) {
+  const list = getUsedEmails()
+  if (!list.includes(email.toLowerCase())) {
+    localStorage.setItem(USED_EMAILS_KEY, JSON.stringify([...list, email.toLowerCase()]))
+  }
+}
 
 // ── Shared submit logic ──────────────────────────────────────────────────
 async function sendPromoCode(email: string) {
+  if (getUsedEmails().includes(email.toLowerCase())) {
+    throw new Error("Энэ имэйлд код аль хэдийн илгээгдсэн байна")
+  }
   const res = await fetch("/api/promo/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -14,6 +28,7 @@ async function sendPromoCode(email: string) {
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.message ?? data.error ?? "Алдаа гарлаа")
+  markEmailUsed(email)
   return (data.data?.code ?? data.code) as string
 }
 

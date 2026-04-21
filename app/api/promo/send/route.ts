@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const code = generateCode()
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
-    // Create coupon in backend (non-blocking — email sending is the primary action)
+    // Create coupon in backend
     let couponId: string | undefined
     try {
       const createRes = await fetch(`${API}/api/coupons`, {
@@ -56,6 +56,14 @@ export async function POST(req: NextRequest) {
           expiresAt: expiresAt.toISOString(),
         }),
       })
+
+      if (createRes.status === 409) {
+        return NextResponse.json(
+          { message: "Энэ имэйлд идэвхтэй код аль хэдийн байна" },
+          { status: 409 }
+        )
+      }
+
       if (createRes.ok) {
         const created = await createRes.json()
         couponId = created?.data?.id ?? created?.id
