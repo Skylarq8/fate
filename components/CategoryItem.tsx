@@ -40,7 +40,7 @@ export default function CategoryItem({
       <div
         style={{ paddingLeft: `${level * 5 + 10}px` }}
         className={`
-          group w-full text-sm py-1.5 pr-1 rounded-xl
+          group w-full text-sm py-1.5 pr-1.5 rounded-xl
           flex items-center justify-between gap-2
           transition-all duration-200
           ${isActive
@@ -52,11 +52,11 @@ export default function CategoryItem({
         {/* Left: indicator dot + name — дарахад select */}
         <button
           onClick={() => { setActiveCategory(category.slug, category.slug); setShowFilter(false) }}
-          className="flex items-center gap-2 min-w-0 flex-1 text-left"
+          className="flex items-center gap-2 py-0.5 min-w-0 flex-1 text-left"
         >
           <span className={`
             shrink-0 w-1.5 h-1.5 rounded-full transition-all duration-200
-            ${isActive ? "bg-rose-500 scale-100" : "bg-white/0 group-hover:bg-white/20 scale-75"}
+            ${isActive ? "bg-rose-500 scale-100l-1" : "bg-white/0 group-hover:bg-white/20 scale-75"}
           `} />
           <span className="truncate leading-snug">{category.name}</span>
         </button>

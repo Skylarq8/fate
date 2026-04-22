@@ -1,67 +1,79 @@
 "use client";
 
 import { Phone, Mail } from "lucide-react";
-import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa"
+import { FaInstagram } from "react-icons/fa";
+
 export default function Footer() {
   return (
-    <footer id="about" className="text-white mt-3">
-    <div className="py-8 px-4">
-    <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center sm:text-left lg:mt-10">
-        {/* Contact info */}
-        <div className="flex flex-col items-center sm:items-start space-y-2">
-        <h3 className="font-bold text-lg mb-2">Холбоо барих</h3>
-        <a href="tel:90304878" className="flex items-center justify-center space-x-2">
-            <Phone size={18} />
-            <span>+976 99274080</span>
-        </a>
-        {/* <a href="tel:55152711" className="flex items-center justify-center space-x-2">
-            <Phone size={18} />
-            <span>+976 55152711</span>
-        </a> */}
-        <div className="flex items-center justify-center space-x-2">
-            <Mail size={18} />
-            <span>fatestore8@gmail.com</span>
-        </div>
-        </div>
+    <footer id="about" className="text-white mt-6">
+      {/* Top separator */}
+      <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent mx-4" />
 
-        {/* Social links */}
-        <div className="flex flex-col items-center sm:items-start space-y-2">
-        <h3 className="font-bold text-lg mb-2">Social</h3>
-        <div className="flex justify-center space-x-4">
-            {/* <a href="https://www.facebook.com/share/14b1zgNwsuF/" target="_blank" rel="noreferrer">
-            <FaFacebook size={23} className="hover:text-blue-500 transition-colors" />
-            </a> */}
-            <a href="https://www.instagram.com/the_fate8?utm_source=ig_web_button_share_sheet" target="_blank" rel="noreferrer">
-            <FaInstagram size={23} className="hover:text-pink-500 transition-colors" />
+      <div className="py-10 px-4">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
+
+            {/* Brand */}
+            <div className="col-span-2 lg:col-span-1 space-y-2">
+              <p className="font-black text-2xl tracking-tight text-white">FATE</p>
+              <p className="text-white/35 text-[13px] leading-relaxed">
+                Монголын шилдэг онлайн дэлгүүр.<br />Чанар, хурд, найдвартай байдал.
+              </p>
+            </div>
+
+            {/* Contact */}
+            <div className="space-y-2.5">
+              <h3 className="font-semibold text-white/80 text-xs uppercase tracking-widest mb-3">Холбоо барих</h3>
+              <a
+                href="tel:+97699274080"
+                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
+              >
+                <Phone size={14} className="shrink-0" />
+                <span>+976 99274080</span>
+              </a>
+              <div className="flex items-center gap-2 text-white/50">
+                <Mail size={14} className="shrink-0" />
+                <span>fatestore8@gmail.com</span>
+              </div>
+            </div>
+
+            {/* Social */}
+            <div className="space-y-2.5">
+              <h3 className="font-semibold text-white/80 text-xs uppercase tracking-widest mb-3">Сошиал</h3>
+              <a
+                href="https://www.instagram.com/the_fate8?utm_source=ig_web_button_share_sheet"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-white/50 hover:text-pink-400 transition-colors"
+              >
+                <FaInstagram size={15} />
+                <span>Instagram</span>
+              </a>
+            </div>
+
+            {/* Links */}
+            <div className="space-y-2.5">
+              <h3 className="font-semibold text-white/80 text-xs uppercase tracking-widest mb-3">Бусад</h3>
+              <a href="/" className="block text-white/50 hover:text-white transition-colors">FAQ</a>
+              <a href="/" className="block text-white/50 hover:text-white transition-colors">Захиалга</a>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="mt-5 pt-5 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-white/25 text-[12px]">© 2026 FATE. Бүх эрх хуулиар хамгаалагдсан.</p>
+            <a
+              href="https://www.instagram.com/the_skylarq/"
+              className="text-white/20 hover:text-white/50 text-[12px] transition-colors"
+            >
+              Built by Skylarq
             </a>
-            {/* <a href="https://www.tiktok.com/@fate.store78?_r=1&_t=ZS-95HhgpJ0hlt" target="_blank" rel="noreferrer">
-            <FaTiktok size={23} className="hover:text-white transition-colors" />
-            </a> */}
-        </div>
-        </div>
+          </div>
 
-        {/* Quick links */}
-        <div className="flex flex-col items-center sm:items-start space-y-2">
-        <h3 className="font-bold text-lg mb-2">Бусад</h3>
-        <a href="/" className="hover:text-gray-300 transition-colors">FAQ</a>
-        <a href="/" className="hover:text-gray-300 transition-colors">Захиалга</a>
-        {/* <a href="/" className="hover:text-gray-400 transition-colors">Буцаалт</a> */}
         </div>
-
-        {/* Description */}
-        <div className="flex flex-col items-center sm:items-start space-y-2">
-        <h3 className="font-bold text-lg mb-2">FATE Ecommerce</h3>
-        <p className="text-gray-200 text-sm">
-            © 2026 E-commerce. Бүх эрх хуулиар хамгаалагдсан.
-        </p>
-        </div>
-    </div>
-    <a href="https://www.instagram.com/the_skylarq/">
-        <div className="pt-4 text-center text-xs text-white/50">
-        © 2026 FATE. Built by Skylarq.
-        </div>
-    </a>
-    </div>
+      </div>
     </footer>
   );
 }

@@ -10,28 +10,26 @@ import { getProducts, getTrendingProducts, getProductsByGender } from "@/lib/api
 export const revalidate = 60
 
 export default async function Home() {
-  const [allProducts, trending, mens, womens] = await Promise.all([
-    getProducts(),
+  const [discount, newArrivals, trending, mens, womens, accessories] = await Promise.all([
+    getProducts({ filter: "discount", limit: 30 }),
+    getProducts({ filter: "newest", limit: 30 }),
     getTrendingProducts(50),
     getProductsByGender("хувцас-эрэгтэй"),
     getProductsByGender("хувцас-эмэгтэй"),
+    getProductsByGender("accessories"),
   ])
 
-  const discount = allProducts.filter(
-    (p) => p.discountEnabled && p.finalPrice
-  )
-  const newArrivals = allProducts.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  const discountIds = new Set(discount.map((p) => p.id))
 
   return (
     <div>
       <HeroSlider/>
       <ProductSlider title="Хямдралтай бараанууд" products={discount}/>
-      <ProductSlider title="Онцлох бараанууд" products={trending}/>
-      <ProductSlider title="Эрэгтэй" products={mens}/>
-      <ProductSlider title="Эмэгтэй" products={womens}/>
-      <ProductSlider title="Шинэ бараанууд" products={newArrivals}/>
+      <ProductSlider title="Онцлох бараанууд" products={trending.filter((p) => !discountIds.has(p.id))}/>
+      <ProductSlider title="Эрэгтэй" products={mens.filter((p) => !discountIds.has(p.id))}/>
+      <ProductSlider title="Эмэгтэй" products={womens.filter((p) => !discountIds.has(p.id))}/>
+      <ProductSlider title="Accessories" products={accessories.filter((p) => !discountIds.has(p.id))}/>
+      <ProductSlider title="Шинэ бараанууд" products={newArrivals.filter((p) => !discountIds.has(p.id))}/>
       <MusicCards/>
       <BrandMarquee/>
       <FooterPromoBar />

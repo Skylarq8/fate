@@ -53,11 +53,13 @@ export async function getProducts(options?: {
   category?: string
   sort?: string
   filter?: string
+  limit?: number
 }): Promise<Product[]> {
   const params = new URLSearchParams()
   if (options?.category && options.category !== "all") params.set("category", options.category)
   if (options?.sort) params.set("sort", options.sort)
   if (options?.filter) params.set("filter", options.filter)
+  if (options?.limit) params.set("limit", String(options.limit))
   const query = params.toString()
   const url = query ? `${BASE_URL}/api/products?${query}` : `${BASE_URL}/api/products`
   const data = await cachedFetch(url)

@@ -61,8 +61,8 @@ export default function RootLayout({
                       speed={1}/>
               </div>
               <ScrollToTop />
-              <PromoPopup />
               <ToastProvider>
+                <PromoPopup />
                 <WishlistProvider>
                   <HeroHeader />
                   <main className="flex-1 w-full mb-10">
