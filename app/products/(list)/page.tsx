@@ -1,4 +1,4 @@
-import { getProducts, getCategories, Product, Category } from "@/lib/api"
+import { getProducts, getCategories, getTrendingProducts, Product, Category } from "@/lib/api"
 import ProductsClient from "@/components/ProductsClient"
 
 export const revalidate = 60
@@ -22,18 +22,25 @@ function findCategory(cats: Category[], slug: string): Category | null {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; category?: string; sort?: string }>
+  searchParams: Promise<{ page?: string; category?: string; sort?: string; filter?: string }>
 }) {
   const sp = await searchParams
   const activeCategory = sp.category || "all"
   const sort = sp.sort || "discount"
+  const filter = sp.filter || ""
+
+  const fetchBase = () => {
+    if (filter === "discount") return getProducts({ filter: "discount" })
+    if (filter === "trend")    return getTrendingProducts(200)
+    return getProducts()
+  }
 
   const [allProducts, categories] = await Promise.all([
-    getProducts(),
+    fetchBase(),
     getCategories(),
   ])
 
-  // Filter — parent дарахад children-ийн бараануудыг ч харуулна
+  // Filter by category — parent дарахад children-ийн бараануудыг ч харуулна
   const filtered = (() => {
     if (activeCategory === "all") return allProducts
     const cat = findCategory(categories, activeCategory)
@@ -70,6 +77,7 @@ export default async function ProductsPage({
       totalPages={totalPages}
       activeCategory={activeCategory}
       sort={sort}
+      filter={filter}
     />
   )
 }

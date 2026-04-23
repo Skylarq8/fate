@@ -24,12 +24,12 @@ export default async function Home() {
   return (
     <div>
       <HeroSlider/>
-      <ProductSlider title="Хямдралтай бараанууд" products={discount}/>
-      <ProductSlider title="Онцлох бараанууд" products={trending.filter((p) => !discountIds.has(p.id))}/>
-      <ProductSlider title="Эрэгтэй" products={mens.filter((p) => !discountIds.has(p.id))}/>
-      <ProductSlider title="Эмэгтэй" products={womens.filter((p) => !discountIds.has(p.id))}/>
-      <ProductSlider title="Accessories" products={accessories.filter((p) => !discountIds.has(p.id))}/>
-      <ProductSlider title="Шинэ бараанууд" products={newArrivals.filter((p) => !discountIds.has(p.id))}/>
+      <ProductSlider title="Хямдралтай бараанууд" products={discount} href="/products?filter=discount"/>
+      <ProductSlider title="Онцлох бараанууд" products={trending.filter((p) => !discountIds.has(p.id))} href="/products?filter=trend"/>
+      <ProductSlider title="Эрэгтэй" products={mens.filter((p) => !discountIds.has(p.id))} href="/products?category=хувцас-эрэгтэй"/>
+      <ProductSlider title="Эмэгтэй" products={womens.filter((p) => !discountIds.has(p.id))} href="/products?category=хувцас-эмэгтэй"/>
+      <ProductSlider title="Accessories" products={accessories.filter((p) => !discountIds.has(p.id))} href="/products?category=accessories"/>
+      <ProductSlider title="Шинэ бараанууд" products={newArrivals.filter((p) => !discountIds.has(p.id))} href="/products?sort=newest"/>
       <MusicCards/>
       <BrandMarquee/>
       <FooterPromoBar />

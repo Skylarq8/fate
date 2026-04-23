@@ -43,6 +43,7 @@ interface Props {
   totalPages: number
   activeCategory: string
   sort: string
+  filter?: string
 }
 
 export default function ProductsClient({
@@ -53,13 +54,12 @@ export default function ProductsClient({
   totalPages,
   activeCategory,
   sort,
+  filter = "",
 }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showFilter,     setShowFilter]     = useState(false)
   const [sortOpen,       setSortOpen]       = useState(false)
-  const [openCategories, setOpenCategories] = useState<string[]>([])
-
   const enrichedCategories = useMemo(
     () => categories.map(enrichCategory),
     [categories]
@@ -75,6 +75,22 @@ export default function ProductsClient({
       cats.flatMap(c => [c, ...flatten(c.children)])
     return flatten(enrichedCategories)
   }, [enrichedCategories])
+
+  // activeCategory-н бүх өвөг категорийн id-уудыг олж анхнаасаа нээнэ
+  const ancestorIds = useMemo(() => {
+    if (activeCategory === "all") return []
+    const findAncestors = (cats: CategoryWithCount[], slug: string, path: string[]): string[] => {
+      for (const cat of cats) {
+        if (cat.slug === slug) return path
+        const found = findAncestors(cat.children, slug, [...path, cat.id])
+        if (found.length) return found
+      }
+      return []
+    }
+    return findAncestors(enrichedCategories, activeCategory, [])
+  }, [activeCategory, enrichedCategories])
+
+  const [openCategories, setOpenCategories] = useState<string[]>(ancestorIds)
 
   useEffect(() => {
     document.body.style.overflow = showFilter ? "hidden" : ""
@@ -102,9 +118,12 @@ export default function ProductsClient({
     const cat = updates.category ?? activeCategory
     const s   = updates.sort     ?? sort
     const p   = updates.page     ?? 1
-    if (cat !== "all")    sp.set("category", cat)
+    // filter-г зөвхөн page шилжихэд хадгална; category/sort өөрчлөхөд цэвэрлэнэ
+    const keepFilter = updates.category === undefined && updates.sort === undefined
+    if (cat !== "all")      sp.set("category", cat)
     if (s   !== "discount") sp.set("sort", s)
-    if (p   > 1)          sp.set("page", String(p))
+    if (p   > 1)            sp.set("page", String(p))
+    if (keepFilter && filter) sp.set("filter", filter)
     const q = sp.toString()
     return q ? `/products?${q}` : "/products"
   }
@@ -245,7 +264,9 @@ export default function ProductsClient({
       {/* ── Header ── */}
       <div className="flex items-end justify-between mb-6">
         <div>
-          <h1 className="font-display text-3xl font-bold text-white">Бараанууд</h1>
+          <h1 className="font-display text-3xl font-bold text-white">
+            {filter === "discount" ? "Хямдралтай бараанууд" : filter === "trend" ? "Онцлох бараанууд" : "Бараанууд"}
+          </h1>
           {activeCategoryName ? (
             <p className="text-white/60 text-sm mt-1">
               <span className="text-rose-500">{activeCategoryName}</span>

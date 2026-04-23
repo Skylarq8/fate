@@ -164,7 +164,7 @@ export function PromoPopup() {
                 </div>
                 <p className="text-white/30 text-xs tracking-widest uppercase">Хямдрал</p>
                 <div className="mt-6 w-12 h-px bg-rose-500/40" />
-                <p className="mt-4 text-[11px] text-white/20 tracking-wide leading-relaxed">FATE — Mongolian<br/>Fashion Store</p>
+                <p className="mt-4 text-[11px] text-white/20 tracking-wide leading-relaxed">FATE — Mongolia</p>
               </div>
 
               {/* Right fade — desktop */}
@@ -365,7 +365,7 @@ export function FooterPromoBar() {
             </div>
             <p className="text-white/30 text-xs tracking-widest uppercase">Хямдрал</p>
             <div className="mt-5 w-10 h-px bg-rose-500/40" />
-            <p className="mt-3 text-[11px] text-white/20 tracking-wide leading-relaxed">FATE — Mongolian<br/>Fashion Store</p>
+            <p className="mt-3 text-[11px] text-white/20 tracking-wide leading-relaxed">FATE — Mongolia</p>
           </div>
 
           {/* Right fade — desktop */}

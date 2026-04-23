@@ -29,9 +29,10 @@ function useReveal() {
 interface Props {
   title: string
   products: Product[]
+  href?: string
 }
 
-export default function ProductSlider({ title, products }: Props) {
+export default function ProductSlider({ title, products, href = "/products" }: Props) {
   if (products.length === 0) return null
   const swiperRef   = useRef<SwiperType | null>(null)
   const titleReveal = useReveal()
@@ -101,7 +102,7 @@ export default function ProductSlider({ title, products }: Props) {
           </div>
 
           <Link
-            href="/products"
+            href={href}
             className="hidden lg:flex items-center gap-1 text-[13px] text-white/40 hover:text-white/80 transition-colors"
           >
             Бүгдийг харах
@@ -147,7 +148,7 @@ export default function ProductSlider({ title, products }: Props) {
       {/* ── Mobile — бүгдийг харах ── */}
       <div className="mt-4 lg:hidden">
         <Link
-          href="/products"
+          href={href}
           className="flex items-center justify-center gap-1 w-full py-2.5 rounded-xl
             border border-white/20 bg-white/10 text-sm text-white/80
             hover:bg-white/15 hover:text-white transition-all"

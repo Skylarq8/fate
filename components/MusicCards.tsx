@@ -146,27 +146,37 @@ export default function MusicCards() {
   const [progress,  setProgress]  = useState<Record<string, number>>({})
   const [page,      setPage]      = useState(0)
   const [sliding,   setSliding]   = useState<"left" | "right" | null>(null)
-  const audioRef  = useRef<HTMLAudioElement | null>(null)
-  const touchX    = useRef<number>(0)
+  const audioRef       = useRef<HTMLAudioElement | null>(null)
+  const currentTrackId = useRef<string | null>(null)
+  const audioMapRef    = useRef<Record<string, HTMLAudioElement>>({})
+  const touchX         = useRef<number>(0)
 
   const totalPages = Math.ceil(tracks.length / 2)
 
   const play = (track: Track) => {
-    if (audioRef.current) {
+    // Pause currently playing track (different one)
+    if (audioRef.current && currentTrackId.current !== track.id) {
       audioRef.current.pause()
-      audioRef.current.ontimeupdate = null
     }
-    const audio = new Audio(track.audio)
-    audioRef.current = audio
-    audio.ontimeupdate = () => {
-      if (!audio.duration) return
-      setProgress(p => ({ ...p, [track.id]: (audio.currentTime / audio.duration) * 100 }))
+
+    // Reuse existing audio element to preserve position
+    if (!audioMapRef.current[track.id]) {
+      const audio = new Audio(track.audio)
+      audio.ontimeupdate = () => {
+        if (!audio.duration) return
+        setProgress(p => ({ ...p, [track.id]: (audio.currentTime / audio.duration) * 100 }))
+      }
+      audio.onended = () => {
+        setPlayingId(null)
+        setProgress(p => ({ ...p, [track.id]: 0 }))
+        delete audioMapRef.current[track.id]
+      }
+      audioMapRef.current[track.id] = audio
     }
-    audio.onended = () => {
-      setPlayingId(null)
-      setProgress(p => ({ ...p, [track.id]: 0 }))
-    }
-    audio.play()
+
+    audioRef.current = audioMapRef.current[track.id]
+    currentTrackId.current = track.id
+    audioRef.current.play()
     setPlayingId(track.id)
   }
 

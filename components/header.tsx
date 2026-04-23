@@ -13,6 +13,14 @@ import { fmt, getProducts, primaryImage, Product } from '@/lib/api'
 import Image from 'next/image'
 import { createPortal } from 'react-dom'
 
+function FateLogo() {
+  return (
+    <span className="font-heading font-bold text-[22px] lg:text-[24px] text-white/90">
+      FATE
+    </span>
+  )
+}
+
 const menuItems = [
   { name: 'Нүүр хуудас',  href: '/' },
   { name: 'Бүх бараа',    href: '/products' },
@@ -20,20 +28,25 @@ const menuItems = [
 ]
 
 // ── Search overlay component ──────────────────────────────────────────────────
-function SearchOverlay({ onClose }: { onClose: () => void }) {
+function SearchOverlay({ isOpen, onClose, inputRef }: {
+  isOpen: boolean
+  onClose: () => void
+  inputRef: React.RefObject<HTMLInputElement | null>
+}) {
   const router = useRouter()
   const [query,       setQuery]       = useState("")
   const [results,     setResults]     = useState<Product[]>([])
   const [allProducts, setAllProducts] = useState<Product[]>([])
-  const [show,        setShow]        = useState(false)
   const [mounted,     setMounted]     = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setMounted(true)
     getProducts().then(setAllProducts)
-    requestAnimationFrame(() => setShow(true))
   }, [])
+
+  useEffect(() => {
+    if (!isOpen) { setQuery(""); setResults([]) }
+  }, [isOpen])
 
   useEffect(() => {
     if (!query.trim()) { setResults([]); return }
@@ -41,10 +54,7 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
     setResults(allProducts.filter(p => p.title.toLowerCase().includes(q)).slice(0, 6))
   }, [query, allProducts])
 
-  const handleClose = () => {
-    setShow(false)
-    setTimeout(onClose, 200)
-  }
+  const handleClose = () => onClose()
 
   const handleSelect = (id: string) => {
     handleClose()
@@ -60,7 +70,11 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div
       className="fixed inset-0 z-[99999] flex flex-col items-center pt-20 px-4"
-      style={{ transition: 'opacity 0.2s', opacity: show ? 1 : 0 }}
+      style={{
+        transition: 'opacity 0.2s',
+        opacity: isOpen ? 1 : 0,
+        pointerEvents: isOpen ? 'auto' : 'none',
+      }}
     >
       {/* backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={handleClose} />
@@ -70,8 +84,8 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
         className="relative w-full max-w-xl z-10"
         style={{
           transition: 'transform 0.2s, opacity 0.2s',
-          transform: show ? 'translateY(0)' : 'translateY(-16px)',
-          opacity: show ? 1 : 0,
+          transform: isOpen ? 'translateY(0)' : 'translateY(-16px)',
+          opacity: isOpen ? 1 : 0,
         }}
       >
         {/* input row */}
@@ -79,7 +93,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
           <Search size={18} className="text-white/40 flex-shrink-0" />
           <input
             ref={inputRef}
-            autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -150,8 +163,14 @@ export const HeroHeader = () => {
   const [menuState,   setMenuState]   = React.useState(false)
   const [isScrolled,  setIsScrolled]  = React.useState(false)
   const [searchOpen,  setSearchOpen]  = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const { wishlist } = useWishlist()
   const { items }    = useCartStore()
+
+  const openSearch = () => {
+    setSearchOpen(true)
+    inputRef.current?.focus()
+  }
 
   React.useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -185,14 +204,13 @@ export const HeroHeader = () => {
                   <X className="in-data-[state=active]:rotate-0 in-data-[state=active]:scale-100 in-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 -rotate-180 scale-0 opacity-0 duration-200" />
                 </button>
 
-                <Link href="/"
-                  className="flex items-center space-x-2 text-white/90 font-heading font-semibold text-[22px] lg:text-[26px] lg:font-bold">
-                  FATE
+                <Link href="/" className="flex items-center">
+                  <FateLogo />
                 </Link>
 
                 {/* Mobile: search + cart */}
                 <div className="flex items-center gap-1 lg:hidden">
-                  <button onClick={() => setSearchOpen(true)}
+                  <button onClick={openSearch}
                     className="p-2 text-white/90 hover:text-white transition-colors">
                     <Search size={20} />
                   </button>
@@ -233,7 +251,7 @@ export const HeroHeader = () => {
                 {/* Desktop icons */}
                 <div className="hidden lg:flex items-center gap-2">
                   {/* Search */}
-                  <button onClick={() => setSearchOpen(true)}
+                  <button onClick={openSearch}
                     className="text-white p-2 px-2.5 rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50">
                     <Search size={17}/>
                   </button>
@@ -269,7 +287,7 @@ export const HeroHeader = () => {
       </header>
 
       {/* Search overlay */}
-      {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} inputRef={inputRef} />
     </>
   )
 }
