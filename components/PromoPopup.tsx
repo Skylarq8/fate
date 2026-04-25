@@ -162,9 +162,9 @@ export function PromoPopup() {
                   <span className="text-[100px] font-black text-white leading-none tracking-tighter">10</span>
                   <span className="text-[42px] font-black text-rose-500 mt-5">%</span>
                 </div>
-                <p className="text-white/30 text-xs tracking-widest uppercase">Хямдрал</p>
+                <p className="text-white/50 text-xs tracking-widest uppercase">Хямдрал</p>
                 <div className="mt-6 w-12 h-px bg-rose-500/40" />
-                <p className="mt-4 text-[11px] text-white/20 tracking-wide leading-relaxed">FATE — Mongolia</p>
+                <p className="mt-4 text-[11px] text-white/50 tracking-wide leading-relaxed">FATE — Mongolia</p>
               </div>
 
               {/* Right fade — desktop */}
@@ -363,9 +363,9 @@ export function FooterPromoBar() {
               <span className="text-[80px] font-black text-white leading-none tracking-tighter">10</span>
               <span className="text-[34px] font-black text-rose-500 mt-4">%</span>
             </div>
-            <p className="text-white/30 text-xs tracking-widest uppercase">Хямдрал</p>
+            <p className="text-white/50 text-xs tracking-widest uppercase">Хямдрал</p>
             <div className="mt-5 w-10 h-px bg-rose-500/40" />
-            <p className="mt-3 text-[11px] text-white/20 tracking-wide leading-relaxed">FATE — Mongolia</p>
+            <p className="mt-3 text-[11px] text-white/50 tracking-wide leading-relaxed">FATE — Mongolia</p>
           </div>
 
           {/* Right fade — desktop */}
