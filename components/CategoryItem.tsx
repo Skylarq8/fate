@@ -62,7 +62,7 @@ export default function CategoryItem({
         </button>
 
         <span className="flex items-center gap-1 shrink-0">
-          {category.productCount > 0 && (
+          {category.productCount > 0 && !isOpen && (
             <span className={`
               text-[11px] px-1.5 py-0.5 rounded-md font-medium tabular-nums
               transition-colors duration-200

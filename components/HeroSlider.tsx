@@ -29,7 +29,7 @@ const slides = [
   {
     src: "https://i.pinimg.com/1200x/99/3a/a7/993aa7bce2e4ec5744390ae63a1cfaa6.jpg",
     tag: "Тусгай хямдрал",
-    title: "30% хүртэл хэмнэлт",
+    title: "10% хүртэл хэмнэлт",
     subtitle: "Хязгаарлагдмал цаг хугацаатай урамшуулалт санал",
     href: "/products",
   },
