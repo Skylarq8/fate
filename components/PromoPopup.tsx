@@ -208,7 +208,7 @@ export function PromoPopup() {
                         type="email"
                         value={email}
                         onChange={e => { setEmail(e.target.value); setError(null) }}
-                        placeholder="imeil@example.com"
+                        placeholder="email@example.com"
                         className={`w-full bg-white/5 border rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors
                           ${error ? "border-red-500/50" : "border-white/8 focus:border-rose-500/40 focus:bg-white/6"}`}
                       />

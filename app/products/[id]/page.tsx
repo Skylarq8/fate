@@ -41,8 +41,17 @@ export default function ProductDetailPage() {
   const [added,     setAdded]     = useState(false)
   const [mounted,   setMounted]   = useState(false)
   const [lightbox,  setLightbox]  = useState(false)
+  const [imgVisible, setImgVisible] = useState(true)
 
   const sorted = product ? [...product.images].sort((a, b) => a.order - b.order) : []
+
+  const goTo = (i: number) => {
+    setImgVisible(false)
+    setTimeout(() => {
+      setActiveImg(i)
+      setImgVisible(true)
+    }, 180)
+  }
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50)
@@ -53,9 +62,9 @@ export default function ProductDetailPage() {
     if (!lightbox) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" && activeImg > 0) {
-        setActiveImg(i => { const n = i - 1; setMainImage(sorted[n].url); return n })
+        goTo(activeImg - 1)
       } else if (e.key === "ArrowRight" && activeImg < sorted.length - 1) {
-        setActiveImg(i => { const n = i + 1; setMainImage(sorted[n].url); return n })
+        goTo(activeImg + 1)
       } else if (e.key === "Escape") {
         setLightbox(false)
       }
@@ -294,8 +303,8 @@ export default function ProductDetailPage() {
             onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
             onTouchEnd={(e) => {
               const deltaX = e.changedTouches[0].clientX - touchStartX
-              if (deltaX > 50 && activeImg > 0) setActiveImg(activeImg - 1)
-              if (deltaX < -50 && activeImg < sorted.length - 1) setActiveImg(activeImg + 1)
+              if (deltaX > 50 && activeImg > 0) goTo(activeImg - 1)
+              if (deltaX < -50 && activeImg < sorted.length - 1) goTo(activeImg + 1)
             }}
             onClick={() => setLightbox(true)}
           >
@@ -304,7 +313,7 @@ export default function ProductDetailPage() {
                 src={mainImage || product.images[0]?.url}
                 alt={product.title}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                className={`object-cover transition-all duration-500 group-hover:scale-[1.03] ${imgVisible ? "opacity-100" : "opacity-0"}`}
                 priority
               />
             ) : (
@@ -321,7 +330,7 @@ export default function ProductDetailPage() {
             {/* Prev arrow */}
             {sorted.length > 1 && activeImg > 0 && (
               <button
-                onClick={(e) => { e.stopPropagation(); setActiveImg(activeImg - 1); setMainImage(sorted[activeImg - 1].url) }}
+                onClick={(e) => { e.stopPropagation(); goTo(activeImg - 1) }}
                 className="absolute left-3 top-1/2 -translate-y-1/2 z-10
                   p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 text-white
                   opacity-100 md:opacity-0 md:group-hover:opacity-100
@@ -334,7 +343,7 @@ export default function ProductDetailPage() {
             {/* Next arrow */}
             {sorted.length > 1 && activeImg < sorted.length - 1 && (
               <button
-                onClick={(e) => { e.stopPropagation(); setActiveImg(activeImg + 1); setMainImage(sorted[activeImg + 1].url) }}
+                onClick={(e) => { e.stopPropagation(); goTo(activeImg + 1) }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 z-10
                   p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 text-white
                   opacity-100 md:opacity-0 md:group-hover:opacity-100
@@ -363,8 +372,7 @@ export default function ProductDetailPage() {
                 <button
                   key={img.id}
                   onClick={() => {
-                    setActiveImg(i)
-                    setMainImage(img.url)
+                    goTo(i)
                     if (img.variantColor) setSelectedColor(img.variantColor)
                   }}
                   className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
@@ -394,17 +402,7 @@ export default function ProductDetailPage() {
               <X size={20} />
             </button>
 
-            {/* Prev */}
-            {activeImg > 0 && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setActiveImg(activeImg - 1); setMainImage(sorted[activeImg - 1].url) }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
-              >
-                <ChevronLeft size={22} />
-              </button>
-            )}
-
-            {/* Image */}
+            {/* Image + arrows */}
             <div
               className="relative z-10 w-[90vw] h-[90vw] max-w-[80vh] max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
@@ -415,17 +413,25 @@ export default function ProductDetailPage() {
                 fill
                 className="object-contain"
               />
-            </div>
 
-            {/* Next */}
-            {activeImg < sorted.length - 1 && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setActiveImg(activeImg + 1); setMainImage(sorted[activeImg + 1].url) }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
-              >
-                <ChevronRight size={22} />
-              </button>
-            )}
+              {activeImg > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); goTo(activeImg - 1) }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+              )}
+
+              {activeImg < sorted.length - 1 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); goTo(activeImg + 1) }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              )}
+            </div>
 
             {/* Dot counter */}
             {sorted.length > 1 && (
@@ -507,10 +513,7 @@ export default function ProductDetailPage() {
                 <button key={c} onClick={() => {
                     setSelectedColor(c)
                     const idx = product.images.findIndex(i => i.variantColor === c)
-                    if (idx !== -1) {
-                      setActiveImg(idx)
-                      setMainImage(product.images[idx].url)
-                    }
+                    if (idx !== -1) goTo(idx)
                 }}
                 className={`px-4 py-2 rounded-xl text-sm lg:text-[15px] font-medium uppercase transition-all ${
                   selectedColor === c ? "text-white/90 bg-rose-500" : "glass-sm text-white/60 underline hover:text-white"
