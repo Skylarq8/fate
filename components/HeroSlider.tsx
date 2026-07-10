@@ -15,7 +15,7 @@ const slides = [
   {
     src: "https://i.pinimg.com/1200x/52/9e/7e/529e7ec19ab5c800ff2abb36956b3452.jpg",
     tag: "Шинэ цуглуулга",
-    title: "2025 Хавар / Зун",
+    title: "2026 Зун / Намар",
     subtitle: "Хамгийн сүүлийн загваруудыг нээж мэдээрэй",
     href: "/products",
   },
